@@ -1,0 +1,14 @@
+{
+  "features": [
+    "target_runs",
+    "score",
+    "wickets_lost",
+    "legal_balls_bowled",
+    "balls_remaining",
+    "runs_required",
+    "current_run_rate",
+    "required_run_rate",
+    "wickets_remaining",
+    "recent_run_rate"
+  ]
+}

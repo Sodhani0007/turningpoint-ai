@@ -1,0 +1,541 @@
+{
+  "1181768": [
+    {
+      "id": "tp_1181768_1",
+      "match_id": "1181768",
+      "start_delivery_idx": 117,
+      "end_delivery_idx": 123,
+      "over_label": "Over 18.6 - 19.6",
+      "prob_before": 0.7412,
+      "prob_after": 0.0,
+      "shift_percentage": -74.1,
+      "runs_in_window": 7,
+      "wickets_in_window": 2,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        118,
+        119,
+        120,
+        121,
+        122,
+        123
+      ],
+      "summary": "Win probability plummeted by -74.1% as 2 wickets lost, 7 runs added (SL Malinga).",
+      "batters_involved": [
+        "SR Watson",
+        "SN Thakur",
+        "RA Jadeja"
+      ],
+      "bowler_involved": "SL Malinga"
+    },
+    {
+      "id": "tp_1181768_2",
+      "match_id": "1181768",
+      "start_delivery_idx": 106,
+      "end_delivery_idx": 109,
+      "over_label": "Over 17.1 - 17.4",
+      "prob_before": 0.2954,
+      "prob_after": 0.8299,
+      "shift_percentage": 53.4,
+      "runs_in_window": 18,
+      "wickets_in_window": 0,
+      "balls_in_window": 3,
+      "supporting_delivery_ids": [
+        107,
+        108,
+        109
+      ],
+      "summary": "Win probability surged by +53.4% as 18 runs scored (KH Pandya).",
+      "batters_involved": [
+        "SR Watson"
+      ],
+      "bowler_involved": "KH Pandya"
+    },
+    {
+      "id": "tp_1181768_3",
+      "match_id": "1181768",
+      "start_delivery_idx": 92,
+      "end_delivery_idx": 98,
+      "over_label": "Over 14.5 - 15.5",
+      "prob_before": 0.1863,
+      "prob_after": 0.5093,
+      "shift_percentage": 32.3,
+      "runs_in_window": 20,
+      "wickets_in_window": 0,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        93,
+        94,
+        95,
+        96,
+        97,
+        98
+      ],
+      "summary": "Win probability surged by +32.3% as 20 runs scored (SL Malinga).",
+      "batters_involved": [
+        "DJ Bravo",
+        "SR Watson"
+      ],
+      "bowler_involved": "SL Malinga"
+    },
+    {
+      "id": "tp_1181768_4",
+      "match_id": "1181768",
+      "start_delivery_idx": 109,
+      "end_delivery_idx": 115,
+      "over_label": "Over 17.4 - 18.4",
+      "prob_before": 0.8299,
+      "prob_after": 0.5081,
+      "shift_percentage": -32.2,
+      "runs_in_window": 4,
+      "wickets_in_window": 1,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        110,
+        111,
+        112,
+        113,
+        114,
+        115
+      ],
+      "summary": "Win probability plummeted by -32.2% as 1 wicket lost, 4 runs added (KH Pandya).",
+      "batters_involved": [
+        "DJ Bravo",
+        "SR Watson",
+        "RA Jadeja"
+      ],
+      "bowler_involved": "KH Pandya"
+    },
+    {
+      "id": "tp_1181768_5",
+      "match_id": "1181768",
+      "start_delivery_idx": 62,
+      "end_delivery_idx": 68,
+      "over_label": "Over 9.6 - 10.6",
+      "prob_before": 0.7527,
+      "prob_after": 0.539,
+      "shift_percentage": -21.4,
+      "runs_in_window": 1,
+      "wickets_in_window": 1,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "summary": "Win probability plummeted by -21.4% as 1 wicket lost, tight bowling conceding only 1 run(s) (JJ Bumrah).",
+      "batters_involved": [
+        "AT Rayudu",
+        "SR Watson",
+        "MS Dhoni"
+      ],
+      "bowler_involved": "JJ Bumrah"
+    }
+  ],
+  "1216527": [
+    {
+      "id": "tp_1216527_1",
+      "match_id": "1216527",
+      "start_delivery_idx": 105,
+      "end_delivery_idx": 111,
+      "over_label": "Over 16.4 - 17.4",
+      "prob_before": 0.1981,
+      "prob_after": 0.8798,
+      "shift_percentage": 68.2,
+      "runs_in_window": 32,
+      "wickets_in_window": 0,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        106,
+        107,
+        108,
+        109,
+        110,
+        111
+      ],
+      "summary": "Win probability surged by +68.2% as 32 runs scored (SS Cottrell).",
+      "batters_involved": [
+        "R Tewatia",
+        "RV Uthappa"
+      ],
+      "bowler_involved": "SS Cottrell"
+    },
+    {
+      "id": "tp_1216527_2",
+      "match_id": "1216527",
+      "start_delivery_idx": 109,
+      "end_delivery_idx": 115,
+      "over_label": "Over 17.2 - 18.2",
+      "prob_before": 0.5954,
+      "prob_after": 0.9435,
+      "shift_percentage": 34.8,
+      "runs_in_window": 24,
+      "wickets_in_window": 1,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        110,
+        111,
+        112,
+        113,
+        114,
+        115
+      ],
+      "summary": "Win probability surged by +34.8% as 1 wicket lost, 24 runs scored (Mohammed Shami).",
+      "batters_involved": [
+        "R Tewatia",
+        "JC Archer",
+        "RV Uthappa"
+      ],
+      "bowler_involved": "Mohammed Shami"
+    },
+    {
+      "id": "tp_1216527_3",
+      "match_id": "1216527",
+      "start_delivery_idx": 95,
+      "end_delivery_idx": 101,
+      "over_label": "Over 14.6 - 15.6",
+      "prob_before": 0.1701,
+      "prob_after": 0.4063,
+      "shift_percentage": 23.6,
+      "runs_in_window": 21,
+      "wickets_in_window": 0,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        96,
+        97,
+        98,
+        99,
+        100,
+        101
+      ],
+      "summary": "Win probability surged by +23.6% as 21 runs scored (GJ Maxwell).",
+      "batters_involved": [
+        "SV Samson"
+      ],
+      "bowler_involved": "GJ Maxwell"
+    },
+    {
+      "id": "tp_1216527_4",
+      "match_id": "1216527",
+      "start_delivery_idx": 100,
+      "end_delivery_idx": 103,
+      "over_label": "Over 15.5 - 16.2",
+      "prob_before": 0.4339,
+      "prob_after": 0.2223,
+      "shift_percentage": -21.2,
+      "runs_in_window": 2,
+      "wickets_in_window": 1,
+      "balls_in_window": 3,
+      "supporting_delivery_ids": [
+        101,
+        102,
+        103
+      ],
+      "summary": "Win probability plummeted by -21.2% as 1 wicket lost, tight bowling conceding only 2 run(s) (GJ Maxwell).",
+      "batters_involved": [
+        "SV Samson",
+        "RV Uthappa"
+      ],
+      "bowler_involved": "GJ Maxwell"
+    },
+    {
+      "id": "tp_1216527_5",
+      "match_id": "1216527",
+      "start_delivery_idx": 57,
+      "end_delivery_idx": 63,
+      "over_label": "Over 8.5 - 9.5",
+      "prob_before": 0.5121,
+      "prob_after": 0.3034,
+      "shift_percentage": -20.9,
+      "runs_in_window": 3,
+      "wickets_in_window": 1,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        58,
+        59,
+        60,
+        61,
+        62,
+        63
+      ],
+      "summary": "Win probability plummeted by -20.9% as 1 wicket lost, 3 runs added (GJ Maxwell).",
+      "batters_involved": [
+        "SPD Smith",
+        "R Tewatia",
+        "SV Samson"
+      ],
+      "bowler_involved": "GJ Maxwell"
+    }
+  ],
+  "1254084": [
+    {
+      "id": "tp_1254084_1",
+      "match_id": "1254084",
+      "start_delivery_idx": 125,
+      "end_delivery_idx": 127,
+      "over_label": "Over 19.4 - 19.6",
+      "prob_before": 0.0354,
+      "prob_after": 1.0,
+      "shift_percentage": 96.5,
+      "runs_in_window": 8,
+      "wickets_in_window": 0,
+      "balls_in_window": 2,
+      "supporting_delivery_ids": [
+        126,
+        127
+      ],
+      "summary": "Win probability surged by +96.5% as 8 runs added (L Ngidi).",
+      "batters_involved": [
+        "KA Pollard"
+      ],
+      "bowler_involved": "L Ngidi"
+    },
+    {
+      "id": "tp_1254084_2",
+      "match_id": "1254084",
+      "start_delivery_idx": 117,
+      "end_delivery_idx": 123,
+      "over_label": "Over 18.2 - 19.2",
+      "prob_before": 0.8267,
+      "prob_after": 0.187,
+      "shift_percentage": -64.0,
+      "runs_in_window": 7,
+      "wickets_in_window": 2,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        118,
+        119,
+        120,
+        121,
+        122,
+        123
+      ],
+      "summary": "Win probability plummeted by -64.0% as 2 wickets lost, 7 runs added (SM Curran).",
+      "batters_involved": [
+        "HH Pandya",
+        "JDS Neesham",
+        "KA Pollard"
+      ],
+      "bowler_involved": "SM Curran"
+    },
+    {
+      "id": "tp_1254084_3",
+      "match_id": "1254084",
+      "start_delivery_idx": 101,
+      "end_delivery_idx": 107,
+      "over_label": "Over 15.6 - 16.6",
+      "prob_before": 0.6944,
+      "prob_after": 0.2401,
+      "shift_percentage": -45.4,
+      "runs_in_window": 2,
+      "wickets_in_window": 1,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        102,
+        103,
+        104,
+        105,
+        106,
+        107
+      ],
+      "summary": "Win probability plummeted by -45.4% as 1 wicket lost, tight bowling conceding only 2 run(s) (SM Curran).",
+      "batters_involved": [
+        "HH Pandya",
+        "KH Pandya",
+        "KA Pollard"
+      ],
+      "bowler_involved": "SM Curran"
+    },
+    {
+      "id": "tp_1254084_4",
+      "match_id": "1254084",
+      "start_delivery_idx": 115,
+      "end_delivery_idx": 118,
+      "over_label": "Over 17.6 - 18.3",
+      "prob_before": 0.3972,
+      "prob_after": 0.8416,
+      "shift_percentage": 44.4,
+      "runs_in_window": 14,
+      "wickets_in_window": 0,
+      "balls_in_window": 3,
+      "supporting_delivery_ids": [
+        116,
+        117,
+        118
+      ],
+      "summary": "Win probability surged by +44.4% as 14 runs added (SM Curran).",
+      "batters_involved": [
+        "HH Pandya"
+      ],
+      "bowler_involved": "SM Curran"
+    },
+    {
+      "id": "tp_1254084_5",
+      "match_id": "1254084",
+      "start_delivery_idx": 87,
+      "end_delivery_idx": 93,
+      "over_label": "Over 14.1 (wd) - 14.5 (wd)",
+      "prob_before": 0.2306,
+      "prob_after": 0.5811,
+      "shift_percentage": 35.0,
+      "runs_in_window": 20,
+      "wickets_in_window": 0,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        88,
+        89,
+        90,
+        91,
+        92,
+        93
+      ],
+      "summary": "Win probability surged by +35.0% as 20 runs scored (SN Thakur).",
+      "batters_involved": [
+        "KA Pollard"
+      ],
+      "bowler_involved": "SN Thakur"
+    }
+  ],
+  "1359487": [
+    {
+      "id": "tp_1359487_1",
+      "match_id": "1359487",
+      "start_delivery_idx": 117,
+      "end_delivery_idx": 122,
+      "over_label": "Over 19.1 - 19.6",
+      "prob_before": 0.001,
+      "prob_after": 1.0,
+      "shift_percentage": 99.9,
+      "runs_in_window": 30,
+      "wickets_in_window": 0,
+      "balls_in_window": 5,
+      "supporting_delivery_ids": [
+        118,
+        119,
+        120,
+        121,
+        122
+      ],
+      "summary": "Win probability surged by +99.9% as 30 runs scored (Yash Dayal).",
+      "batters_involved": [
+        "RK Singh"
+      ],
+      "bowler_involved": "Yash Dayal"
+    },
+    {
+      "id": "tp_1359487_2",
+      "match_id": "1359487",
+      "start_delivery_idx": 94,
+      "end_delivery_idx": 100,
+      "over_label": "Over 15.4 - 16.4",
+      "prob_before": 0.6609,
+      "prob_after": 0.0766,
+      "shift_percentage": -58.4,
+      "runs_in_window": 1,
+      "wickets_in_window": 4,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        95,
+        96,
+        97,
+        98,
+        99,
+        100
+      ],
+      "summary": "Win probability plummeted by -58.4% as 4 wickets lost, tight bowling conceding only 1 run(s) (Rashid Khan).",
+      "batters_involved": [
+        "SP Narine",
+        "SN Thakur",
+        "VR Iyer",
+        "UT Yadav",
+        "AD Russell"
+      ],
+      "bowler_involved": "Rashid Khan"
+    },
+    {
+      "id": "tp_1359487_3",
+      "match_id": "1359487",
+      "start_delivery_idx": 61,
+      "end_delivery_idx": 67,
+      "over_label": "Over 10.2 - 11.2",
+      "prob_before": 0.2458,
+      "prob_after": 0.5355,
+      "shift_percentage": 29.0,
+      "runs_in_window": 22,
+      "wickets_in_window": 0,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        62,
+        63,
+        64,
+        65,
+        66,
+        67
+      ],
+      "summary": "Win probability surged by +29.0% as 22 runs scored (Yash Dayal).",
+      "batters_involved": [
+        "VR Iyer",
+        "N Rana"
+      ],
+      "bowler_involved": "Yash Dayal"
+    },
+    {
+      "id": "tp_1359487_4",
+      "match_id": "1359487",
+      "start_delivery_idx": 74,
+      "end_delivery_idx": 80,
+      "over_label": "Over 12.3 - 13.3",
+      "prob_before": 0.716,
+      "prob_after": 0.4449,
+      "shift_percentage": -27.1,
+      "runs_in_window": 3,
+      "wickets_in_window": 1,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        75,
+        76,
+        77,
+        78,
+        79,
+        80
+      ],
+      "summary": "Win probability plummeted by -27.1% as 1 wicket lost, 3 runs added (Rashid Khan).",
+      "batters_involved": [
+        "VR Iyer",
+        "N Rana",
+        "RK Singh"
+      ],
+      "bowler_involved": "Rashid Khan"
+    },
+    {
+      "id": "tp_1359487_5",
+      "match_id": "1359487",
+      "start_delivery_idx": 84,
+      "end_delivery_idx": 90,
+      "over_label": "Over 14.1 - 14.6",
+      "prob_before": 0.4252,
+      "prob_after": 0.6669,
+      "shift_percentage": 24.2,
+      "runs_in_window": 16,
+      "wickets_in_window": 0,
+      "balls_in_window": 6,
+      "supporting_delivery_ids": [
+        85,
+        86,
+        87,
+        88,
+        89,
+        90
+      ],
+      "summary": "Win probability surged by +24.2% as 16 runs scored (J Little).",
+      "batters_involved": [
+        "VR Iyer",
+        "RK Singh"
+      ],
+      "bowler_involved": "J Little"
+    }
+  ]
+}

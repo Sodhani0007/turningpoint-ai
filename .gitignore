@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend_venv/
+venv/
+ENV/
+.pytest_cache/
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Data - Keep curated matches, exclude large raw zip/all
+data/ipl_all/
+*.zip
+
+# OS
+.DS_Store
+Thumbs.db
+powershell.cmd
+*.log
+.env
