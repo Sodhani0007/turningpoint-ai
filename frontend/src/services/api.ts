@@ -124,6 +124,7 @@ export function normalizeExplainResponse(data: any): ExplainResponse {
     },
     source: data.source || 'deterministic_fallback',
     llm_metadata: data.llm_metadata,
+    user_question: data.user_question ? String(data.user_question) : undefined,
   };
 }
 
@@ -243,16 +244,31 @@ export class CricketApiService {
             turning_point_id: turningPointId,
             custom_prompt: customPrompt,
           }),
-          signal: AbortSignal.timeout(9000),
+          signal: AbortSignal.timeout(15000),
         });
         const contentType = res.headers.get('content-type') || '';
         if (res.ok && contentType.includes('application/json')) {
           const raw = await res.json();
-          return normalizeExplainResponse(raw);
+          const normalized = normalizeExplainResponse(raw);
+          if (customPrompt && !normalized.user_question) {
+            normalized.user_question = customPrompt;
+          }
+          return normalized;
+        } else {
+          const errText = await res.text();
+          throw new Error(`AI service returned HTTP ${res.status}: ${errText.slice(0, 100)}`);
         }
       } catch (err) {
-        console.warn('Backend /explain call failed, falling back to precomputed explanation:', err);
+        console.warn('Backend /explain call failed:', err);
+        if (customPrompt) {
+          // Never silently replace a failed question with the generic turning-point explanation
+          throw err;
+        }
       }
+    }
+
+    if (customPrompt) {
+      throw new Error('Ask AI is unavailable in offline fallback mode. Connect to backend API to query the live model.');
     }
 
     // Fallback to verified precomputed explanations

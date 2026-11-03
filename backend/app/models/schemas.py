@@ -104,6 +104,7 @@ class ExplainResponse(BaseModel):
     verified_evidence: Dict[str, Any]
     source: str = "deterministic_fallback"  # "live_llm" | "precomputed_llm" | "deterministic_fallback"
     llm_metadata: Optional[Dict[str, Any]] = None
+    user_question: Optional[str] = None
 
 class MatchReplayResponse(BaseModel):
     metadata: MatchMetadata

@@ -336,3 +336,73 @@ def test_groq_request_payload_token_budget():
         assert payload["max_tokens"] >= 1500
         assert payload["model"] == "openai/gpt-oss-20b"
         assert result.source == "live_llm"
+
+def test_explain_with_custom_prompt_incorporates_question_and_returns_user_question():
+    import json
+    import asyncio
+    from unittest.mock import patch
+    from backend.app.services.explainer import ExplanationEngine
+
+    mock_engine = ExplanationEngine(api_key="gsk_dummy_test_key", provider="groq", model="openai/gpt-oss-20b")
+    
+    resp = client.get("/api/matches/1359487/replay")
+    match_data = resp.json()
+    metadata = MatchMetadata(**match_data["metadata"])
+    deliveries = [DeliveryEvent(**d) for d in match_data["deliveries"]]
+    tp = TurningPoint(**match_data["turning_points"][0])
+
+    captured_payloads = []
+
+    class MockAnswerResponse:
+        status_code = 200
+        text = json.dumps({
+            "choices": [{
+                "message": {
+                    "content": json.dumps({
+                        "headline": "Yash Dayal Bowled Final Over",
+                        "explanation": "Yash Dayal bowled the final over (Over 19) for Gujarat Titans.",
+                        "takeaway": "Yash Dayal conceded 31 runs in the over.",
+                        "confidence_notes": "Verified from bowler delivery data.",
+                        "supporting_delivery_ids": [117, 118, 119, 120, 121, 122]
+                    })
+                }
+            }]
+        })
+        def json(self):
+            return json.loads(self.text)
+
+    async def mock_post(url, headers=None, json=None, **kwargs):
+        captured_payloads.append(json)
+        return MockAnswerResponse()
+
+    user_q = "Who was bowling the final over?"
+    with patch("httpx.AsyncClient.post", side_effect=mock_post):
+        result = asyncio.run(mock_engine.explain(tp, deliveries, metadata, custom_prompt=user_q))
+        
+        assert len(captured_payloads) == 1
+        prompt_content = captured_payloads[0]["messages"][1]["content"]
+        assert user_q in prompt_content, "Custom question must be explicitly present in prompt content"
+        assert "Answer the User Question directly" in prompt_content
+        
+        assert result.source == "live_llm"
+        assert result.user_question == user_q
+        assert "Yash Dayal" in result.headline or "Yash Dayal" in result.explanation
+
+def test_explain_deterministic_fallback_with_custom_prompt():
+    import asyncio
+    from backend.app.services.explainer import ExplanationEngine
+
+    mock_engine = ExplanationEngine() # no api key -> fallback
+    
+    resp = client.get("/api/matches/1359487/replay")
+    match_data = resp.json()
+    metadata = MatchMetadata(**match_data["metadata"])
+    deliveries = [DeliveryEvent(**d) for d in match_data["deliveries"]]
+    tp = TurningPoint(**match_data["turning_points"][0])
+
+    user_q = "How many runs were scored in the over?"
+    result = asyncio.run(mock_engine.explain(tp, deliveries, metadata, custom_prompt=user_q))
+    
+    assert result.source == "deterministic_fallback"
+    assert result.user_question == user_q
+    assert user_q in result.explanation or user_q[:20] in result.headline

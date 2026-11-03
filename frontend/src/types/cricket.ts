@@ -153,6 +153,7 @@ export interface ExplainResponse {
     model: string;
     latency_ms?: number;
   };
+  user_question?: string;
 }
 
 export interface BackendStatus {

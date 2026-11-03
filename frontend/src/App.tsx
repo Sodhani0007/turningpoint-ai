@@ -27,6 +27,7 @@ export const App: React.FC = () => {
   const [explanation, setExplanation] = useState<ExplainResponse | null>(null);
   const [isExplaining, setIsExplaining] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [qaError, setQaError] = useState<string | null>(null);
   
   // Model Metrics Modal
   const [isMetricsOpen, setIsMetricsOpen] = useState<boolean>(false);
@@ -184,6 +185,7 @@ export const App: React.FC = () => {
       handleSelectTurningPoint(tp);
       setIsModalOpen(true);
       setIsExplaining(true);
+      setQaError(null);
       try {
         const resp = await apiService.explainTurningPoint(
           selectedMatchId,
@@ -193,6 +195,9 @@ export const App: React.FC = () => {
         setExplanation(resp);
       } catch (err: any) {
         console.error('Failed to get explanation:', err);
+        if (customPrompt) {
+          setQaError(err?.message || 'Failed to answer custom question. Please verify connection and retry.');
+        }
       } finally {
         setIsExplaining(false);
       }
@@ -326,10 +331,14 @@ export const App: React.FC = () => {
       >
         <ExplanationModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setQaError(null);
+          }}
           turningPoint={selectedTurningPoint}
           explanation={explanation}
           isLoading={isExplaining}
+          errorMessage={qaError}
           onAskCustomPrompt={(prompt) => {
             if (selectedTurningPoint) {
               handleExplainTurningPoint(selectedTurningPoint, prompt);

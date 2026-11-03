@@ -18,9 +18,9 @@ PRECOMPUTED_EXPLANATIONS_PATH = os.path.join(
 
 SYSTEM_PROMPT = (
     "You are an evidence-grounded cricket analyst helping fans understand match momentum. "
-    "Use only the supplied match events and statistics. Never invent a score, wicket, player action or tactical decision. "
-    "Explain observed factors rather than asserting unproven causality. Use plain English and distinguish model "
-    "estimates from facts. Distinguish the state entering the phase (before the first delivery) from the state after the first delivery. "
+    "Use ONLY the supplied match events, deliveries, and statistics. Never invent a score, wicket, player action, bowler, or tactical decision. "
+    "If a question asks who was bowling, what happened on specific balls, or why the win probability changed, answer specifically with the facts from the evidence. "
+    "If a question cannot be answered from the provided evidence, state clearly that it is not available in the match data. "
     "Keep responses concise: headline <= 10 words, explanation <= 70 words, takeaway <= 25 words. "
     "Return strictly valid JSON with keys: headline, explanation, takeaway, confidence_notes, supporting_delivery_ids. "
     "Do not output conversational preamble, markdown explanations, or chain-of-thought."
@@ -49,7 +49,8 @@ def extract_json_payload(raw_text: str) -> Dict[str, Any]:
 def validate_deterministic_facts(
     parsed: Dict[str, Any],
     evidence: Dict[str, Any],
-    tp: TurningPoint
+    tp: TurningPoint,
+    custom_prompt: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Deterministically validate and disambiguate score, runs required, and ball positions.
@@ -60,17 +61,17 @@ def validate_deterministic_facts(
     takeaway = parsed.get("takeaway", "")
 
     # For Rinku Singh's miracle over (1359487_tp_1359487_1):
-    # Ensure score entering (176/7, 29 needed off 6) and post-first-ball (177/7, 28 needed off 5) are unambiguous
-    if tp.id == "tp_1359487_1" and evidence.get("match_id") == "1359487":
+    # Only disambiguate generic shift explanations if no custom question was asked
+    if not custom_prompt and tp.id == "tp_1359487_1" and evidence.get("match_id") == "1359487":
         if "19.1" in explanation and ("28" not in explanation or "177" not in explanation):
             explanation += (
                 f" Specifically, entering Over 19 at 176/7, 29 runs were required from 6 balls; "
                 f"after Umesh Yadav's single on 19.1 reached 177/7, 28 runs were required from the final 5 balls."
             )
 
-    parsed["headline"] = headline.strip()
-    parsed["explanation"] = explanation.strip()
-    parsed["takeaway"] = takeaway.strip()
+    parsed["headline"] = headline.strip() if isinstance(headline, str) else ""
+    parsed["explanation"] = explanation.strip() if isinstance(explanation, str) else ""
+    parsed["takeaway"] = takeaway.strip() if isinstance(takeaway, str) else ""
     return parsed
 
 class ExplanationEngine:
@@ -278,16 +279,32 @@ class ExplanationEngine:
 
         evidence = self.build_evidence_payload(tp, deliveries, metadata)
         start_time = time.time()
-        user_content = (
-            f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
-            f"Task: Provide a factual explanation for why the model-estimated win probability changed "
-            f"by {tp.shift_percentage}% across {tp.over_label}. "
-            f"State clearly the score entering the phase ({evidence['entering_score']} with {evidence['entering_runs_needed']} needed off {evidence['entering_balls_remaining']} balls), "
-            f"the event on the first delivery ({evidence['first_delivery_over']}), and the resulting equation ({evidence['runs_needed_after_first_delivery']} needed off {evidence['balls_remaining_after_first_delivery']} balls). "
-            f"Rely strictly on the deliveries provided above."
-        )
         if custom_prompt:
-            user_content += f"\nUser Question: {custom_prompt}"
+            user_content = (
+                f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
+                f"User Question: {custom_prompt}\n\n"
+                f"Task: Answer the User Question directly, factually, and accurately using ONLY the match evidence provided above. "
+                f"Match Context: {metadata.second_innings_team} chasing {metadata.target_runs} vs {metadata.first_innings_team} ({tp.over_label}).\n"
+                f"Guidelines:\n"
+                f"- If the question asks who was bowling: state the bowler's name explicitly from the evidence ({evidence.get('bowler_involved', 'the bowler')}).\n"
+                f"- If the question asks about sixes, runs, wickets, or events: state the exact numbers and deliveries from the evidence.\n"
+                f"- If the question asks why win probability shifted: explain the mathematical impact of the runs and boundary sequence.\n"
+                f"- If the question cannot be answered from the evidence: state clearly that the information is not available in the match data.\n"
+                f"- 'headline': Concise 3-8 word title answering the question (must not be empty).\n"
+                f"- 'explanation': 1-3 direct sentences (<= 60 words) giving the exact answer.\n"
+                f"- 'takeaway': 1 concise key takeaway sentence (<= 20 words).\n"
+                f"- 'supporting_delivery_ids': List of integer delivery IDs from the evidence that support the answer.\n"
+                f"Return strictly valid JSON with keys: headline, explanation, takeaway, confidence_notes, supporting_delivery_ids."
+            )
+        else:
+            user_content = (
+                f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
+                f"Task: Provide a factual explanation for why the model-estimated win probability changed "
+                f"by {tp.shift_percentage}% across {tp.over_label}. "
+                f"State clearly the score entering the phase ({evidence['entering_score']} with {evidence['entering_runs_needed']} needed off {evidence['entering_balls_remaining']} balls), "
+                f"the event on the first delivery ({evidence['first_delivery_over']}), and the resulting equation ({evidence['runs_needed_after_first_delivery']} needed off {evidence['balls_remaining_after_first_delivery']} balls). "
+                f"Rely strictly on the deliveries provided above."
+            )
 
         headers = {
             "Authorization": f"Bearer {self.api_key}",
@@ -367,7 +384,7 @@ class ExplanationEngine:
 
             content = resp.json()["choices"][0]["message"]["content"]
             parsed = extract_json_payload(content)
-            parsed = validate_deterministic_facts(parsed, evidence, tp)
+            parsed = validate_deterministic_facts(parsed, evidence, tp, custom_prompt)
 
             # Strictly sanitize supporting delivery IDs within the valid range
             valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
@@ -376,13 +393,23 @@ class ExplanationEngine:
             if not sanitized_ids:
                 sanitized_ids = tp.supporting_delivery_ids
 
+            h_raw = parsed.get("headline")
+            e_raw = parsed.get("explanation")
+            t_raw = parsed.get("takeaway")
+            c_raw = parsed.get("confidence_notes")
+
+            headline = h_raw.strip() if isinstance(h_raw, str) and h_raw.strip() else (f"Answer: {custom_prompt[:35]}" if custom_prompt else f"Momentum Swing in {tp.over_label}")
+            explanation = e_raw.strip() if isinstance(e_raw, str) and e_raw.strip() else (f"Based on verified match evidence for {tp.over_label}: {tp.summary}" if custom_prompt else tp.summary)
+            takeaway = t_raw.strip() if isinstance(t_raw, str) and t_raw.strip() else "Grounded in observed delivery events."
+            confidence = c_raw.strip() if isinstance(c_raw, str) and c_raw.strip() else "Verified from delivery data."
+
             return ExplainResponse(
                 turning_point_id=tp.id,
                 match_id=metadata.match_id,
-                headline=parsed.get("headline", f"Momentum Swing in {tp.over_label}"),
-                explanation=parsed.get("explanation", tp.summary),
-                takeaway=parsed.get("takeaway", "Decisive phase in the chase."),
-                confidence_notes=parsed.get("confidence_notes", "Grounded in observed delivery events."),
+                headline=headline,
+                explanation=explanation,
+                takeaway=takeaway,
+                confidence_notes=confidence,
                 supporting_delivery_ids=sanitized_ids,
                 verified_evidence=evidence,
                 source="live_llm",
@@ -390,7 +417,8 @@ class ExplanationEngine:
                     "provider": self.provider,
                     "model": self.model,
                     "latency_ms": latency_ms
-                }
+                },
+                user_question=custom_prompt
             )
 
     async def explain(
@@ -400,7 +428,7 @@ class ExplanationEngine:
         metadata: MatchMetadata,
         custom_prompt: Optional[str] = None
     ) -> ExplainResponse:
-        cache_key = f"{metadata.match_id}_{tp.id}_{custom_prompt or 'default'}"
+        cache_key = f"{metadata.match_id}_{tp.id}_{custom_prompt.strip() if custom_prompt else 'default'}"
 
         # 1. Check runtime live cache first
         if cache_key in self._live_cache:
@@ -419,40 +447,73 @@ class ExplanationEngine:
 
         evidence = self.build_evidence_payload(tp, deliveries, metadata)
 
-        # 3. Check precomputed cache
-        file_cache_key = f"{metadata.match_id}_{tp.id}"
-        if file_cache_key in self.precomputed:
-            item = self.precomputed[file_cache_key]
-            valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
-            cleaned_ids = [i for i in item.get("supporting_delivery_ids", []) if i in valid_ids] or valid_ids
-            
-            # Determine provenance
-            is_llm = item.get("source") == "precomputed_llm" or "model" in item.get("llm_metadata", {})
-            source_tag = "precomputed_llm" if is_llm else "deterministic_fallback"
+        # 3. Check precomputed cache (ONLY for default turning-point explanations, never for custom questions!)
+        if not custom_prompt:
+            file_cache_key = f"{metadata.match_id}_{tp.id}"
+            if file_cache_key in self.precomputed:
+                item = self.precomputed[file_cache_key]
+                valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
+                cleaned_ids = [i for i in item.get("supporting_delivery_ids", []) if i in valid_ids] or valid_ids
+                
+                # Determine provenance
+                is_llm = item.get("source") == "precomputed_llm" or "model" in item.get("llm_metadata", {})
+                source_tag = "precomputed_llm" if is_llm else "deterministic_fallback"
 
-            return ExplainResponse(
-                turning_point_id=tp.id,
-                match_id=metadata.match_id,
-                headline=item.get("headline", f"Shift of {tp.shift_percentage}% in {tp.over_label}"),
-                explanation=item.get("explanation", tp.summary),
-                takeaway=item.get("takeaway", "Key match phase shifting win probability."),
-                confidence_notes=item.get("confidence_notes", "Verified match-evidence analysis."),
-                supporting_delivery_ids=cleaned_ids,
-                verified_evidence=evidence,
-                source=source_tag,
-                llm_metadata=item.get("llm_metadata")
-            )
+                return ExplainResponse(
+                    turning_point_id=tp.id,
+                    match_id=metadata.match_id,
+                    headline=item.get("headline", f"Shift of {tp.shift_percentage}% in {tp.over_label}"),
+                    explanation=item.get("explanation", tp.summary),
+                    takeaway=item.get("takeaway", "Key match phase shifting win probability."),
+                    confidence_notes=item.get("confidence_notes", "Verified match-evidence analysis."),
+                    supporting_delivery_ids=cleaned_ids,
+                    verified_evidence=evidence,
+                    source=source_tag,
+                    llm_metadata=item.get("llm_metadata")
+                )
 
         # 4. Fallback to deterministic synthesis
-        return self._generate_deterministic_explanation(tp, evidence, metadata)
+        return self._generate_deterministic_explanation(tp, evidence, metadata, custom_prompt=custom_prompt)
 
     def _generate_deterministic_explanation(
         self,
         tp: TurningPoint,
         evidence: Dict[str, Any],
-        metadata: MatchMetadata
+        metadata: MatchMetadata,
+        custom_prompt: Optional[str] = None
     ) -> ExplainResponse:
         direction = "in favor of" if tp.shift_percentage > 0 else "against"
+        pct_abs = abs(tp.shift_percentage)
+
+        if custom_prompt:
+            headline = f"Answer: {custom_prompt[:35]}"
+            explanation = (
+                f"Regarding '{custom_prompt}': In {tp.over_label}, {metadata.second_innings_team} scored "
+                f"{tp.runs_in_window} runs for the loss of {tp.wickets_in_window} wicket(s) against bowler {evidence.get('bowler_involved', 'the bowler')}. "
+                f"The model win probability changed by {tp.shift_percentage}%."
+            )
+            takeaway = f"Evidence covers {tp.runs_in_window} runs in {tp.balls_in_window} legal balls."
+        else:
+            headline = f"Shift of {tp.shift_percentage}% in {tp.over_label}"
+            explanation = (
+                f"During {tp.over_label}, {metadata.second_innings_team} scored {tp.runs_in_window} runs "
+                f"for the loss of {tp.wickets_in_window} wicket(s) in {tp.balls_in_window} balls against {evidence.get('bowler_involved') or 'the opposition bowling'}. "
+                f"This shifted the model-estimated win probability by {pct_abs}% {direction} {metadata.second_innings_team}."
+            )
+            takeaway = f"{tp.summary}"
+
+        return ExplainResponse(
+            turning_point_id=tp.id,
+            match_id=metadata.match_id,
+            headline=headline,
+            explanation=explanation,
+            takeaway=takeaway,
+            confidence_notes="Deterministic evidence analysis based on observed deliveries.",
+            supporting_delivery_ids=tp.supporting_delivery_ids,
+            verified_evidence=evidence,
+            source="deterministic_fallback",
+            user_question=custom_prompt
+        )
         pct_abs = abs(tp.shift_percentage)
         
         events_summary = []

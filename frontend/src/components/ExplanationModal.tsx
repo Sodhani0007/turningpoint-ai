@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ExplainResponse, TurningPoint } from '../types/cricket';
-import { X, Sparkles, ShieldCheck, Cpu, ArrowUpRight, ArrowDownRight, Send, ListChecks } from 'lucide-react';
+import { X, Sparkles, ShieldCheck, Cpu, ArrowUpRight, ArrowDownRight, Send, ListChecks, AlertTriangle, HelpCircle } from 'lucide-react';
 
 interface ExplanationModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface ExplanationModalProps {
   explanation: ExplainResponse | null;
   isLoading: boolean;
   onAskCustomPrompt: (prompt: string) => void;
+  errorMessage?: string | null;
 }
 
 export const ExplanationModal: React.FC<ExplanationModalProps> = ({
@@ -18,6 +19,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
   explanation,
   isLoading,
   onAskCustomPrompt,
+  errorMessage,
 }) => {
   const [customQuestion, setCustomQuestion] = useState('');
 
@@ -124,24 +126,60 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-sm text-slate-300">
+          {/* Query Error Alert if custom prompt failed */}
+          {errorMessage && (
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2.5" data-testid="qa-error-alert">
+              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-rose-200 mb-0.5">Ask AI Query Error</p>
+                <p className="text-rose-300/90">{errorMessage}</p>
+              </div>
+            </div>
+          )}
+
           {isLoading ? (
             <div className="py-12 flex flex-col items-center justify-center gap-3 text-center" data-testid="explanation-loading-spinner">
               <div className="w-8 h-8 border-3 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
               <p className="text-sm text-slate-400 font-medium">
-                Synthesizing evidence-grounded momentum analysis...
+                Synthesizing evidence-grounded answer...
               </p>
             </div>
           ) : explanation ? (
             <>
-              {/* Main Grounded Explanation Card */}
-              <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
-                <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 mb-1.5">
-                  AI Tactical & Statistical Breakdown
+              {/* If this explanation answered a specific user question, display Question and Answer clearly separated */}
+              {explanation.user_question ? (
+                <div className="p-4 rounded-xl bg-slate-900 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)] space-y-3" data-testid="user-qa-card">
+                  <div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 mb-1 flex items-center gap-1.5">
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      User Question
+                    </div>
+                    <p className="text-sm font-semibold text-white bg-slate-950/60 p-2.5 rounded-lg border border-slate-800" data-testid="user-question-text">
+                      "{explanation.user_question}"
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-400 mb-1 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      AI Grounded Answer
+                    </div>
+                    <p className="text-sm sm:text-base leading-relaxed text-slate-100 font-medium" data-testid="user-answer-text">
+                      {explanation.explanation}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm sm:text-base leading-relaxed text-slate-200" data-testid="explanation-text">
-                  {explanation.explanation}
-                </p>
-              </div>
+              ) : (
+                /* Main Grounded Explanation Card (for default turning-point explanation) */
+                <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800">
+                  <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 mb-1.5">
+                    AI Tactical & Statistical Breakdown
+                  </div>
+                  <p className="text-sm sm:text-base leading-relaxed text-slate-200" data-testid="explanation-text">
+                    {explanation.explanation}
+                  </p>
+                </div>
+              )}
 
               {/* Key Takeaway */}
               <div className="p-3.5 rounded-xl bg-cyan-950/20 border border-cyan-500/30">
