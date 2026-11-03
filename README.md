@@ -133,6 +133,7 @@ python -m venv backend_venv
 # Activate virtual environment:
 # Windows (PowerShell):
 .\backend_venv\Scripts\Activate.ps1
+python -m pytest backend/tests/ -v
 # macOS/Linux:
 source backend_venv/bin/activate
 
