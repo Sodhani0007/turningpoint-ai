@@ -129,6 +129,41 @@ def test_explain_sanitizes_hallucinated_delivery_ids():
         assert -50 not in result.supporting_delivery_ids
         assert all(tp.start_delivery_idx <= did <= tp.end_delivery_idx for did in result.supporting_delivery_ids)
 
+def test_groq_model_configuration_and_json_parsing():
+    import os
+    from backend.app.services.explainer import ExplanationEngine, extract_json_payload
+    
+    # 1. Test default Groq model is openai/gpt-oss-20b
+    old_groq_key = os.environ.get("GROQ_API_KEY")
+    old_groq_model = os.environ.get("GROQ_MODEL")
+    try:
+        os.environ["GROQ_API_KEY"] = "gsk_dummy_test_key"
+        os.environ.pop("GROQ_MODEL", None)
+        engine_default = ExplanationEngine()
+        assert engine_default.provider == "groq"
+        assert engine_default.model == "openai/gpt-oss-20b"
+        
+        # 2. Test GROQ_MODEL environment variable override
+        os.environ["GROQ_MODEL"] = "qwen/qwen3.8-27b"
+        engine_custom = ExplanationEngine()
+        assert engine_custom.provider == "groq"
+        assert engine_custom.model == "qwen/qwen3.8-27b"
+    finally:
+        if old_groq_key is not None:
+            os.environ["GROQ_API_KEY"] = old_groq_key
+        else:
+            os.environ.pop("GROQ_API_KEY", None)
+        if old_groq_model is not None:
+            os.environ["GROQ_MODEL"] = old_groq_model
+        else:
+            os.environ.pop("GROQ_MODEL", None)
+
+    # 3. Test robust JSON extraction with markdown code fences
+    fenced_content = "```json\n{\"headline\": \"Test Headline\", \"supporting_delivery_ids\": [1, 2]}\n```"
+    parsed = extract_json_payload(fenced_content)
+    assert parsed["headline"] == "Test Headline"
+    assert parsed["supporting_delivery_ids"] == [1, 2]
+
 def test_explain_endpoint_rejects_invalid_tp():
     payload = {
         "match_id": "1359487",

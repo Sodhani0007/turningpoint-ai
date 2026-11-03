@@ -20,13 +20,16 @@ async def run_real_provider_smoke_test():
         print("\nResult: INFERENCE NOT EXECUTED (Missing Credentials)")
         sys.exit(1)
 
+    # 2. Configurable model via GROQ_MODEL (default: openai/gpt-oss-20b)
+    target_model = os.environ.get("GROQ_MODEL", "openai/gpt-oss-20b").strip()
+
     masked_key = f"{api_key[:4]}...{api_key[-4:]}" if len(api_key) > 8 else "***"
     print(f"\n[Environment Check]")
     print(f"  GROQ_API_KEY: Configured (masked: {masked_key}, length: {len(api_key)})")
     print(f"  Target Provider: Groq Cloud API (OpenAI-compatible /chat/completions)")
-    print(f"  Target Model: llama-3.3-70b-versatile")
+    print(f"  Target Model: {target_model} (configured via GROQ_MODEL, default: openai/gpt-oss-20b)")
 
-    # 2. Load Match 1359487 (GT vs KKR) and Rinku Singh Turning Point
+    # 3. Load Match 1359487 (GT vs KKR) and Rinku Singh Turning Point
     data_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "backend", "data", "precomputed")
     replay_file = os.path.join(data_dir, "matches_replay.json")
 
@@ -52,18 +55,19 @@ async def run_real_provider_smoke_test():
     print(f"  Win Probability Shift: {target_tp.shift_percentage}%")
     print(f"  Delivery Index Range: [{target_tp.start_delivery_idx}, {target_tp.end_delivery_idx}]")
 
-    # 3. Instantiate Engine with explicit Groq parameters
+    # 4. Instantiate Engine with explicit Groq parameters
     base_url = os.environ.get("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
     engine = ExplanationEngine(
         api_key=api_key,
         base_url=base_url,
         provider="groq",
-        model="llama-3.3-70b-versatile"
+        model=target_model
     )
 
-    # 4. Execute STRICT live inference (NO caches, NO fallbacks)
+    # 5. Execute STRICT live inference (NO caches, NO fallbacks)
     print("\n[Executing Real Server-Side Groq Request]")
     print("  Endpoint: https://api.groq.com/openai/v1/chat/completions")
+    print(f"  Model: {target_model}")
     print("  Calling explain_live_strict() — will fail if provider call fails...")
 
     try:
@@ -78,7 +82,7 @@ async def run_real_provider_smoke_test():
         print(f"  Message: {exc}")
         sys.exit(1)
 
-    # 5. Rigorous contract validation
+    # 6. Rigorous contract validation
     print("\n[Contract Verification & Integrity Audit]")
 
     # Check source tag
@@ -92,8 +96,8 @@ async def run_real_provider_smoke_test():
     if meta.get("provider") != "groq":
         print(f"  [FAIL] Provider mismatch: expected 'groq', got '{meta.get('provider')}'")
         sys.exit(1)
-    if meta.get("model") != "llama-3.3-70b-versatile":
-        print(f"  [FAIL] Model mismatch: expected 'llama-3.3-70b-versatile', got '{meta.get('model')}'")
+    if meta.get("model") != target_model:
+        print(f"  [FAIL] Model mismatch: expected '{target_model}', got '{meta.get('model')}'")
         sys.exit(1)
     latency_ms = meta.get("latency_ms", 0)
     if latency_ms <= 0:

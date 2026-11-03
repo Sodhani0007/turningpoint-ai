@@ -24,6 +24,26 @@ SYSTEM_PROMPT = (
     "takeaway, confidence_notes, supporting_delivery_ids."
 )
 
+def extract_json_payload(raw_text: str) -> Dict[str, Any]:
+    """Robustly parse JSON payload even if wrapped in markdown code blocks or whitespace."""
+    text = raw_text.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        end = text.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            return json.loads(text[start:end+1])
+        raise
+
 class ExplanationEngine:
     def __init__(
         self,
@@ -39,6 +59,7 @@ class ExplanationEngine:
         self.model = model or ""
 
         groq_env = os.environ.get("GROQ_API_KEY") or settings.GROQ_API_KEY
+        groq_model = os.environ.get("GROQ_MODEL") or settings.GROQ_MODEL or "openai/gpt-oss-20b"
         gemini_env = os.environ.get("GEMINI_API_KEY") or settings.GEMINI_API_KEY
         openai_env = os.environ.get("OPENAI_API_KEY") or settings.OPENAI_API_KEY
 
@@ -47,20 +68,23 @@ class ExplanationEngine:
                 self.provider = "groq"
                 self.api_key = groq_env
                 self.base_url = os.environ.get("GROQ_BASE_URL") or settings.GROQ_BASE_URL
-                self.model = "llama-3.3-70b-versatile"
+                self.model = model or groq_model
             elif gemini_env:
                 self.provider = "gemini"
                 self.api_key = gemini_env
                 self.base_url = os.environ.get("GEMINI_BASE_URL") or settings.GEMINI_BASE_URL
-                self.model = "gemini-2.0-flash"
+                self.model = model or "gemini-2.0-flash"
             elif openai_env:
                 self.provider = "openai"
                 self.api_key = openai_env
                 self.base_url = os.environ.get("OPENAI_BASE_URL") or settings.OPENAI_BASE_URL
-                self.model = "gpt-4o-mini"
+                self.model = model or "gpt-4o-mini"
         else:
             self.provider = provider or "custom"
-            self.model = model or "llama-3.3-70b-versatile"
+            if self.provider == "groq":
+                self.model = model or groq_model
+            else:
+                self.model = model or "openai/gpt-oss-20b"
 
         self.precomputed: Dict[str, Dict[str, Any]] = self._load_precomputed()
         
@@ -175,7 +199,7 @@ class ExplanationEngine:
         custom_prompt: Optional[str] = None
     ) -> ExplainResponse:
         """
-        Execute strict live LLM inference against the configured provider.
+        Execute strict live LLM inference against the configured provider and model.
         Bypasses all precomputed caches and deterministic fallbacks.
         Raises on any network, authentication, schema, or rate-limit error.
         """
@@ -201,7 +225,8 @@ class ExplanationEngine:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json"
         }
-        payload = {
+        
+        payload: Dict[str, Any] = {
             "model": self.model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
@@ -213,8 +238,16 @@ class ExplanationEngine:
         }
 
         endpoint = f"{self.base_url.rstrip('/')}/chat/completions"
-        async with httpx.AsyncClient(timeout=12.0) as client:
+        async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(endpoint, headers=headers, json=payload)
+            
+            # If the selected model does not support response_format={"type": "json_object"}, retry without it
+            if resp.status_code == 400 and any(k in resp.text.lower() for k in ["response_format", "json_object", "json_mode", "not supported"]):
+                logger.info(f"Model {self.model} rejected response_format; retrying without parameter.")
+                payload_fallback = dict(payload)
+                payload_fallback.pop("response_format", None)
+                resp = await client.post(endpoint, headers=headers, json=payload_fallback)
+
             latency_ms = int((time.time() - start_time) * 1000)
 
             if resp.status_code != 200:
@@ -223,7 +256,7 @@ class ExplanationEngine:
                 )
 
             content = resp.json()["choices"][0]["message"]["content"]
-            parsed = json.loads(content)
+            parsed = extract_json_payload(content)
 
             # Strictly sanitize supporting delivery IDs within the valid range
             valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
