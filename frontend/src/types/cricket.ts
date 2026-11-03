@@ -147,7 +147,20 @@ export interface ExplainResponse {
       event_description: string;
     }>;
   };
-  source: 'ai_live' | 'precomputed';
+  source: 'live_llm' | 'precomputed_llm' | 'deterministic_fallback' | 'ai_live' | 'precomputed';
+  llm_metadata?: {
+    provider: string;
+    model: string;
+    latency_ms?: number;
+  };
+}
+
+export interface BackendStatus {
+  connected: boolean;
+  isOfflineFallback: boolean;
+  aiProviderStatus: 'available' | 'unavailable';
+  aiProviderName: string;
+  aiProviderModel: string;
 }
 
 export interface ModelMetrics {

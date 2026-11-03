@@ -15,6 +15,9 @@ def test_health_endpoint():
     assert data["status"] == "healthy"
     assert data["model_loaded"] is True
     assert data["available_matches_count"] >= 4
+    assert "ai_provider_status" in data
+    assert "ai_provider_name" in data
+    assert "ai_provider_model" in data
     assert "brier_score" in data["model_evaluation_metrics"]
 
 def test_get_matches():
@@ -80,9 +83,51 @@ def test_explain_endpoint_precomputed():
     assert len(data["headline"]) > 0
     assert len(data["explanation"]) > 0
     assert len(data["supporting_delivery_ids"]) > 0
+    assert data["source"] in ["live_llm", "precomputed_llm", "deterministic_fallback"]
     # Must have verified evidence payload
     assert "verified_evidence" in data
     assert data["verified_evidence"]["match_id"] == "1359487"
+
+def test_explain_sanitizes_hallucinated_delivery_ids():
+    from backend.app.services.explainer import ExplanationEngine
+    from unittest.mock import patch, MagicMock
+    
+    mock_engine = ExplanationEngine(api_key="test_dummy_key", provider="test_provider", model="test_model")
+    
+    # Mock httpx response returning out-of-range delivery IDs (e.g. 9999, -50)
+    fake_llm_json = {
+        "headline": "Mocked LLM Headline",
+        "explanation": "Mocked LLM explanation.",
+        "takeaway": "Mocked takeaway.",
+        "confidence_notes": "Mocked notes.",
+        "supporting_delivery_ids": [9999, -50] # Hallucinated IDs!
+    }
+    
+    resp = client.get("/api/matches/1359487/replay")
+    match_data = resp.json()
+    metadata = MatchMetadata(**match_data["metadata"])
+    deliveries = [DeliveryEvent(**d) for d in match_data["deliveries"]]
+    tp = TurningPoint(**match_data["turning_points"][0])
+    
+    class MockHttpxResponse:
+        status_code = 200
+        def json(self):
+            import json
+            return {"choices": [{"message": {"content": json.dumps(fake_llm_json)}}]}
+
+    with patch("httpx.AsyncClient.post") as mock_post:
+        import asyncio
+        async def mock_async_post(*args, **kwargs):
+            return MockHttpxResponse()
+        mock_post.side_effect = mock_async_post
+        
+        result = asyncio.run(mock_engine.explain(tp, deliveries, metadata))
+        assert result.source == "live_llm"
+        assert result.llm_metadata["provider"] == "test_provider"
+        # Since 9999 and -50 are hallucinated outside tp range, they should be sanitized
+        assert 9999 not in result.supporting_delivery_ids
+        assert -50 not in result.supporting_delivery_ids
+        assert all(tp.start_delivery_idx <= did <= tp.end_delivery_idx for did in result.supporting_delivery_ids)
 
 def test_explain_endpoint_rejects_invalid_tp():
     payload = {

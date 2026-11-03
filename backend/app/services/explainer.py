@@ -1,8 +1,10 @@
 import os
 import json
+import time
 import logging
 from typing import Dict, Any, List, Optional
 import httpx
+from ..core.config import settings
 from ..models.schemas import (
     ExplainRequest, ExplainResponse, TurningPoint, DeliveryEvent, MatchMetadata
 )
@@ -23,10 +25,68 @@ SYSTEM_PROMPT = (
 )
 
 class ExplanationEngine:
-    def __init__(self, api_key: Optional[str] = None, base_url: Optional[str] = None):
-        self.api_key = api_key or os.environ.get("GROQ_API_KEY") or os.environ.get("OPENAI_API_KEY")
-        self.base_url = base_url or os.environ.get("GROQ_BASE_URL", "https://api.groq.com/openai/v1")
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        provider: Optional[str] = None,
+        model: Optional[str] = None
+    ):
+        # Determine provider and keys
+        self.provider = "none"
+        self.api_key = api_key or ""
+        self.base_url = base_url or ""
+        self.model = model or ""
+
+        if not self.api_key:
+            if settings.GROQ_API_KEY:
+                self.provider = "groq"
+                self.api_key = settings.GROQ_API_KEY
+                self.base_url = settings.GROQ_BASE_URL
+                self.model = "llama-3.3-70b-versatile"
+            elif settings.GEMINI_API_KEY:
+                self.provider = "gemini"
+                self.api_key = settings.GEMINI_API_KEY
+                self.base_url = settings.GEMINI_BASE_URL
+                self.model = "gemini-2.0-flash"
+            elif settings.OPENAI_API_KEY:
+                self.provider = "openai"
+                self.api_key = settings.OPENAI_API_KEY
+                self.base_url = settings.OPENAI_BASE_URL
+                self.model = "gpt-4o-mini"
+        else:
+            self.provider = provider or "custom"
+            self.model = model or "llama-3.3-70b-versatile"
+
         self.precomputed: Dict[str, Dict[str, Any]] = self._load_precomputed()
+        
+        # In-memory runtime cache for live LLM responses
+        self._live_cache: Dict[str, Dict[str, Any]] = {}
+        # Sliding-window rate limiter (timestamps)
+        self._request_timestamps: List[float] = []
+        self._rate_limit_max_per_minute = 20
+
+    def get_provider_status(self) -> Dict[str, Any]:
+        if self.api_key and self.provider != "none":
+            return {
+                "status": "available",
+                "provider": self.provider,
+                "model": self.model
+            }
+        return {
+            "status": "unavailable",
+            "provider": "None",
+            "model": "None"
+        }
+
+    def _check_rate_limit(self) -> bool:
+        now = time.time()
+        # Keep timestamps within the last 60 seconds
+        self._request_timestamps = [t for t in self._request_timestamps if now - t < 60.0]
+        if len(self._request_timestamps) >= self._rate_limit_max_per_minute:
+            return False
+        self._request_timestamps.append(now)
+        return True
 
     def _load_precomputed(self) -> Dict[str, Dict[str, Any]]:
         if os.path.exists(PRECOMPUTED_EXPLANATIONS_PATH):
@@ -53,7 +113,6 @@ class ExplanationEngine:
         Build strictly bounded historical evidence.
         Deliveries past end_delivery_idx are excluded to prevent future leakage.
         """
-        # Only take deliveries within the turning point window
         window_deliveries = [
             d for d in deliveries 
             if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx
@@ -112,29 +171,17 @@ class ExplanationEngine:
         custom_prompt: Optional[str] = None
     ) -> ExplainResponse:
         evidence = self.build_evidence_payload(tp, deliveries, metadata)
-        cache_key = f"{metadata.match_id}_{tp.id}"
+        cache_key = f"{metadata.match_id}_{tp.id}_{custom_prompt or 'default'}"
 
-        # 1. Check if precomputed explanation exists
-        if cache_key in self.precomputed and not self.api_key:
-            item = self.precomputed[cache_key]
-            # Ensure supporting delivery IDs are valid
-            valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
-            cleaned_ids = [i for i in item.get("supporting_delivery_ids", []) if i in valid_ids] or valid_ids
-            return ExplainResponse(
-                turning_point_id=tp.id,
-                match_id=metadata.match_id,
-                headline=item.get("headline", f"Shift of {tp.shift_percentage}% in {tp.over_label}"),
-                explanation=item.get("explanation", tp.summary),
-                takeaway=item.get("takeaway", "Key match phase shifting win probability."),
-                confidence_notes=item.get("confidence_notes", "Verified precomputed analysis based on verified match deliveries."),
-                supporting_delivery_ids=cleaned_ids,
-                verified_evidence=evidence,
-                source="precomputed"
-            )
+        # 1. Check runtime live cache first
+        if cache_key in self._live_cache:
+            cached = self._live_cache[cache_key]
+            return ExplainResponse(**cached)
 
-        # 2. If API Key is present, try live LLM call
-        if self.api_key:
+        # 2. If API Key is present and rate-limit permits, attempt live LLM request
+        if self.api_key and self._check_rate_limit():
             try:
+                start_time = time.time()
                 user_content = (
                     f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
                     f"Task: Provide a factual explanation for why the model-estimated win probability changed "
@@ -148,7 +195,7 @@ class ExplanationEngine:
                     "Content-Type": "application/json"
                 }
                 payload = {
-                    "model": "llama-3.3-70b-versatile" if "groq" in self.base_url.lower() else "gpt-4o-mini",
+                    "model": self.model,
                     "messages": [
                         {"role": "system", "content": SYSTEM_PROMPT},
                         {"role": "user", "content": user_content}
@@ -158,24 +205,23 @@ class ExplanationEngine:
                     "max_tokens": 500
                 }
 
+                endpoint = f"{self.base_url.rstrip('/')}/chat/completions"
                 async with httpx.AsyncClient(timeout=8.0) as client:
-                    resp = await client.post(
-                        f"{self.base_url.rstrip('/')}/chat/completions",
-                        headers=headers,
-                        json=payload
-                    )
+                    resp = await client.post(endpoint, headers=headers, json=payload)
+                    latency_ms = int((time.time() - start_time) * 1000)
+
                     if resp.status_code == 200:
                         content = resp.json()["choices"][0]["message"]["content"]
                         parsed = json.loads(content)
-                        
+
+                        # Strictly sanitize supporting delivery IDs within the valid range
                         valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
-                        # Reject unsupported evidence IDs
                         raw_ids = parsed.get("supporting_delivery_ids", [])
                         sanitized_ids = [i for i in raw_ids if i in valid_ids]
                         if not sanitized_ids:
                             sanitized_ids = tp.supporting_delivery_ids
 
-                        return ExplainResponse(
+                        result = ExplainResponse(
                             turning_point_id=tp.id,
                             match_id=metadata.match_id,
                             headline=parsed.get("headline", f"Momentum Swing in {tp.over_label}"),
@@ -184,31 +230,45 @@ class ExplanationEngine:
                             confidence_notes=parsed.get("confidence_notes", "Grounded in observed delivery events."),
                             supporting_delivery_ids=sanitized_ids,
                             verified_evidence=evidence,
-                            source="ai_live"
+                            source="live_llm",
+                            llm_metadata={
+                                "provider": self.provider,
+                                "model": self.model,
+                                "latency_ms": latency_ms
+                            }
                         )
+                        self._live_cache[cache_key] = result.model_dump()
+                        return result
                     else:
                         logger.warning(f"Live LLM call returned {resp.status_code}: {resp.text}")
             except Exception as e:
-                logger.warning(f"Live LLM call failed: {e}. Falling back to precomputed.")
+                logger.warning(f"Live LLM call failed ({e}). Falling back to precomputed / deterministic.")
 
-        # 3. Fallback to precomputed or deterministic synthesis
-        if cache_key in self.precomputed:
-            item = self.precomputed[cache_key]
+        # 3. Check precomputed cache
+        file_cache_key = f"{metadata.match_id}_{tp.id}"
+        if file_cache_key in self.precomputed:
+            item = self.precomputed[file_cache_key]
             valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
             cleaned_ids = [i for i in item.get("supporting_delivery_ids", []) if i in valid_ids] or valid_ids
+            
+            # Determine provenance
+            is_llm = item.get("source") == "precomputed_llm" or "model" in item.get("llm_metadata", {})
+            source_tag = "precomputed_llm" if is_llm else "deterministic_fallback"
+
             return ExplainResponse(
                 turning_point_id=tp.id,
                 match_id=metadata.match_id,
                 headline=item.get("headline", f"Shift of {tp.shift_percentage}% in {tp.over_label}"),
                 explanation=item.get("explanation", tp.summary),
                 takeaway=item.get("takeaway", "Key match phase shifting win probability."),
-                confidence_notes="Precomputed analysis verified against historical deliveries.",
+                confidence_notes=item.get("confidence_notes", "Verified match-evidence analysis."),
                 supporting_delivery_ids=cleaned_ids,
                 verified_evidence=evidence,
-                source="precomputed"
+                source=source_tag,
+                llm_metadata=item.get("llm_metadata")
             )
 
-        # Deterministic grounded explanation if neither LLM nor cache available
+        # 4. Fallback to deterministic synthesis
         return self._generate_deterministic_explanation(tp, evidence, metadata)
 
     def _generate_deterministic_explanation(
@@ -251,7 +311,7 @@ class ExplanationEngine:
             confidence_notes="Deterministic evidence synthesis based strictly on second-innings scorecard events.",
             supporting_delivery_ids=tp.supporting_delivery_ids,
             verified_evidence=evidence,
-            source="precomputed"
+            source="deterministic_fallback"
         )
 
 _explainer_instance = None

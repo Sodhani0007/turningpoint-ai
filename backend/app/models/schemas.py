@@ -102,7 +102,8 @@ class ExplainResponse(BaseModel):
     confidence_notes: Optional[str] = None
     supporting_delivery_ids: List[int]
     verified_evidence: Dict[str, Any]
-    source: str = "ai_live"  # "ai_live" or "precomputed"
+    source: str = "deterministic_fallback"  # "live_llm" | "precomputed_llm" | "deterministic_fallback"
+    llm_metadata: Optional[Dict[str, Any]] = None
 
 class MatchReplayResponse(BaseModel):
     metadata: MatchMetadata

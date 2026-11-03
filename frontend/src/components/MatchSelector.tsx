@@ -38,6 +38,7 @@ export const MatchSelector: React.FC<MatchSelectorProps> = ({
               key={m.match_id}
               onClick={() => onSelectMatch(m.match_id)}
               disabled={isLoading}
+              data-testid={`match-card-${m.match_id}`}
               className={`text-left p-3 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden ${
                 isSelected
                   ? 'bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'

@@ -29,7 +29,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
   playbackSpeed,
   onChangeSpeed,
 }) => {
-  // Global spacebar shortcut for play/pause
+  // Global spacebar and arrow keys shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
@@ -44,20 +44,23 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
       } else if (e.code === 'ArrowRight') {
         e.preventDefault();
         onStepForward();
+      } else if (e.code === 'KeyR') {
+        e.preventDefault();
+        onRestart();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onTogglePlay, onStepBack, onStepForward]);
+  }, [onTogglePlay, onStepBack, onStepForward, onRestart]);
 
   const speeds = [1, 2, 4];
 
   return (
-    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-4 shadow-xl">
+    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-4 shadow-xl" data-testid="replay-controls-card">
       <div className="flex flex-col gap-3">
         {/* Seek Slider with Delivery Details */}
         <div className="flex items-center gap-4">
-          <span className="text-xs font-mono-numbers text-slate-400 min-w-[70px]">
+          <span className="text-xs font-mono-numbers text-slate-400 min-w-[70px]" data-testid="delivery-counter">
             Ball {currentDeliveryIndex + 1}/{totalDeliveries}
           </span>
 
@@ -67,10 +70,11 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             max={Math.max(0, totalDeliveries - 1)}
             value={currentDeliveryIndex}
             onChange={(e) => onSeek(Number(e.target.value))}
+            data-testid="replay-seek-slider"
             className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400 hover:accent-emerald-300 transition-all"
           />
 
-          <span className="text-xs font-bold font-mono-numbers text-emerald-400 min-w-[65px] text-right">
+          <span className="text-xs font-bold font-mono-numbers text-emerald-400 min-w-[65px] text-right" data-testid="current-over-label">
             Over {currentDelivery?.display_over}
           </span>
         </div>
@@ -82,6 +86,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             {/* Restart */}
             <button
               onClick={onRestart}
+              data-testid="restart-btn"
               className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 transition-colors cursor-pointer"
               title="Restart from ball 0 (R)"
             >
@@ -92,6 +97,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             <button
               onClick={onStepBack}
               disabled={currentDeliveryIndex === 0}
+              data-testid="step-back-btn"
               className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               title="Step Backward (Left Arrow)"
             >
@@ -101,6 +107,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             {/* Play / Pause Primary Button */}
             <button
               onClick={onTogglePlay}
+              data-testid="play-pause-btn"
               className={`flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-xs tracking-wide uppercase transition-all duration-200 cursor-pointer shadow-lg ${
                 isPlaying
                   ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
@@ -125,6 +132,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             <button
               onClick={onStepForward}
               disabled={currentDeliveryIndex >= totalDeliveries - 1}
+              data-testid="step-forward-btn"
               className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
               title="Step Forward (Right Arrow)"
             >
@@ -139,6 +147,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
               <button
                 key={s}
                 onClick={() => onChangeSpeed(s)}
+                data-testid={`speed-btn-${s}x`}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono-numbers font-semibold transition-all cursor-pointer ${
                   playbackSpeed === s
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
@@ -161,6 +170,10 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
               ← / →
             </kbd>
             <span>Step</span>
+            <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700 font-mono">
+              R
+            </kbd>
+            <span>Restart</span>
           </div>
         </div>
       </div>

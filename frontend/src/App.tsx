@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { apiService, ReplayData } from './services/api';
-import { MatchSummary, TurningPoint, ExplainResponse, DeliveryEvent } from './types/cricket';
+import { MatchSummary, TurningPoint, ExplainResponse, DeliveryEvent, BackendStatus } from './types/cricket';
 import { Header } from './components/Header';
 import { MatchSelector } from './components/MatchSelector';
 import { Scoreboard } from './components/Scoreboard';
@@ -31,7 +31,7 @@ export const App: React.FC = () => {
   const [isMetricsOpen, setIsMetricsOpen] = useState<boolean>(false);
   
   // Backend & Loading Status
-  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
+  const [backendStatus, setBackendStatus] = useState<BackendStatus>(apiService.getBackendStatus());
   const [isLoadingMatch, setIsLoadingMatch] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -40,11 +40,12 @@ export const App: React.FC = () => {
   // Match switch sequence ref to prevent stale async responses
   const activeMatchRequestId = useRef<string>('');
 
-  // 1. Initial Load: Check backend & fetch matches
+  // 1. Initial Load: Check backend & fetch matches & subscribe to status
   useEffect(() => {
+    const unsubscribe = apiService.onStatusChange(setBackendStatus);
+
     const initApp = async () => {
-      const isLive = await apiService.checkBackend();
-      setBackendConnected(isLive);
+      await apiService.checkBackend();
       try {
         const summaries = await apiService.getMatches();
         setMatches(summaries);
@@ -56,7 +57,9 @@ export const App: React.FC = () => {
         setErrorMessage('Failed to load match listings.');
       }
     };
+
     initApp();
+    return () => unsubscribe();
   }, []);
 
   // 2. Fetch Replay Data when selectedMatchId changes
@@ -73,7 +76,6 @@ export const App: React.FC = () => {
         // Ensure no race condition with rapid match switching
         if (activeMatchRequestId.current === reqId) {
           setReplayData(data);
-          // Default to start of chase or near thrilling phase? Start at ball 0 for full replay
           setCurrentDeliveryIndex(0);
           setSelectedTurningPoint(null);
           setExplanation(null);
@@ -154,10 +156,11 @@ export const App: React.FC = () => {
     setCurrentDeliveryIndex((prev) => Math.min(replayData.deliveries.length - 1, prev + 1));
   }, [replayData]);
 
-  // Handler: Seek
+  // Handler: Seek (pauses automatic playback to prevent race conditions)
   const handleSeek = useCallback(
     (index: number) => {
       if (!replayData) return;
+      setIsPlaying(false);
       const boundedIdx = Math.max(0, Math.min(replayData.deliveries.length - 1, index));
       setCurrentDeliveryIndex(boundedIdx);
     },
@@ -207,7 +210,7 @@ export const App: React.FC = () => {
     <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
       {/* Top Header */}
       <Header
-        backendConnected={backendConnected}
+        backendStatus={backendStatus}
         onOpenMetrics={() => setIsMetricsOpen(true)}
       />
 
@@ -244,6 +247,7 @@ export const App: React.FC = () => {
               metadata={replayData.metadata}
               currentDelivery={currentDelivery}
               recentDeliveries={recentDeliveries}
+              onSeek={handleSeek}
             />
 
             {/* Interactive Timeline Chart */}

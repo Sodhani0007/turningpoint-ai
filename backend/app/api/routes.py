@@ -31,7 +31,10 @@ def load_precomputed_summaries() -> List[Dict[str, Any]]:
     return []
 
 @router.get("/health")
-def get_health(ml_model: WinProbabilityModel = Depends(get_ml_model)):
+def get_health(
+    ml_model: WinProbabilityModel = Depends(get_ml_model),
+    explainer: ExplanationEngine = Depends(get_explainer)
+):
     metrics_path = os.path.join(DATA_DIR, "model", "model_metrics.json")
     metrics = {}
     if os.path.exists(metrics_path):
@@ -39,11 +42,15 @@ def get_health(ml_model: WinProbabilityModel = Depends(get_ml_model)):
             metrics = json.load(f)
             
     replays = load_precomputed_replays()
+    ai_status = explainer.get_provider_status()
     return {
         "status": "healthy",
         "service": "TurningPoint AI Backend",
         "model_loaded": ml_model.model is not None,
         "available_matches_count": len(replays),
+        "ai_provider_status": ai_status["status"],
+        "ai_provider_name": ai_status["provider"],
+        "ai_provider_model": ai_status["model"],
         "model_evaluation_metrics": metrics
     }
 

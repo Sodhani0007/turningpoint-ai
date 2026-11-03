@@ -6,12 +6,14 @@ interface ScoreboardProps {
   metadata: MatchMetadata;
   currentDelivery: DeliveryEvent;
   recentDeliveries: DeliveryEvent[];
+  onSeek?: (index: number) => void;
 }
 
 export const Scoreboard: React.FC<ScoreboardProps> = ({
   metadata,
   currentDelivery,
   recentDeliveries,
+  onSeek,
 }) => {
   const isChasingTeamAhead =
     currentDelivery.win_probability !== null && currentDelivery.win_probability >= 0.5;
@@ -28,7 +30,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const isBallsExhausted = ballsRemaining === 0;
 
   return (
-    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-5 shadow-2xl relative overflow-hidden" data-testid="scoreboard-card">
       {/* Background glow accent based on probability */}
       <div
         className={`absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 opacity-20 ${
@@ -46,7 +48,9 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <span>{metadata.second_innings_team}</span>
             <span className="text-xs font-normal text-slate-400">chasing</span>
             <span className="text-emerald-400 font-mono-numbers">{metadata.target_runs}</span>
-            <span className="text-xs font-normal text-slate-400">set by {metadata.first_innings_team} ({metadata.first_innings_total}/{metadata.first_innings_wickets})</span>
+            <span className="text-xs font-normal text-slate-400">
+              set by {metadata.first_innings_team} ({metadata.first_innings_total}/{metadata.first_innings_wickets})
+            </span>
           </h2>
         </div>
 
@@ -65,6 +69,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
               className={`text-2xl font-black font-mono-numbers tracking-tight ${
                 isChasingTeamAhead ? 'text-emerald-400' : 'text-cyan-400'
               }`}
+              data-testid="win-probability-value"
             >
               {winProbPct}%
             </span>
@@ -86,18 +91,24 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <span className="text-emerald-400 font-mono-numbers">Target {metadata.target_runs}</span>
           </div>
           <div className="flex items-baseline gap-3 my-1">
-            <div className="text-4xl font-black text-white font-mono-numbers tracking-tight">
+            <div className="text-4xl font-black text-white font-mono-numbers tracking-tight" data-testid="scoreboard-runs">
               {currentDelivery.score}
               <span className="text-2xl font-bold text-slate-400">/{currentDelivery.wickets_lost}</span>
             </div>
-            <div className="text-sm font-semibold text-slate-400 font-mono-numbers">
+            <div className="text-sm font-semibold text-slate-400 font-mono-numbers" data-testid="scoreboard-overs">
               {currentDelivery.display_over} / {metadata.scheduled_overs} ov
             </div>
           </div>
           <div className="text-xs text-slate-400 flex items-center gap-2">
-            <span>CRR: <strong className="text-slate-200 font-mono-numbers">{currentDelivery.current_run_rate}</strong></span>
+            <span>
+              CRR: <strong className="text-slate-200 font-mono-numbers">{currentDelivery.current_run_rate}</strong>
+            </span>
             <span>•</span>
-            <span>RRR: <strong className={`font-mono-numbers ${currentDelivery.required_run_rate > 15 ? 'text-rose-400' : 'text-amber-400'}`}>{currentDelivery.required_run_rate > 100 ? '---' : currentDelivery.required_run_rate}</strong></span>
+            <span>
+              RRR: <strong className={`font-mono-numbers ${currentDelivery.required_run_rate > 15 ? 'text-rose-400' : 'text-amber-400'}`}>
+                {currentDelivery.required_run_rate > 100 ? '---' : currentDelivery.required_run_rate}
+              </strong>
+            </span>
           </div>
         </div>
 
@@ -107,7 +118,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <Target className="w-3.5 h-3.5 text-cyan-400" />
             <span>Need</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono-numbers my-0.5">
+          <div className="text-2xl font-black text-white font-mono-numbers my-0.5" data-testid="runs-needed-value">
             {runsNeeded} <span className="text-xs font-normal text-slate-400">runs</span>
           </div>
           <div className="text-[11px] text-slate-400">
@@ -121,7 +132,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
             <Timer className="w-3.5 h-3.5 text-amber-400" />
             <span>Balls Left</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono-numbers my-0.5">
+          <div className="text-2xl font-black text-white font-mono-numbers my-0.5" data-testid="balls-remaining-value">
             {ballsRemaining} <span className="text-xs font-normal text-slate-400">balls</span>
           </div>
           <div className="text-[11px] text-slate-400">
@@ -171,7 +182,7 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
       {/* Current Delivery Highlight & Recent Ball Ticker */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
         {/* On Strike & Bowling */}
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center gap-3 text-xs flex-wrap">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-slate-400">Striker:</span>
@@ -192,37 +203,43 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">Recent:</span>
           {recentDeliveries.map((d) => {
-            let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700';
+            let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500';
             let label = d.total_runs.toString();
 
             if (d.wicket_count_delivery > 0) {
-              badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold';
+              badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold hover:bg-rose-500/30';
               label = 'W';
             } else if (d.batter_runs === 6) {
-              badgeColor = 'bg-purple-500/20 text-purple-300 border-purple-500/40 font-bold';
+              badgeColor = 'bg-purple-500/20 text-purple-300 border-purple-500/40 font-bold hover:bg-purple-500/30';
               label = '6';
             } else if (d.batter_runs === 4) {
-              badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold';
+              badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold hover:bg-emerald-500/30';
               label = '4';
             } else if (d.is_wide) {
-              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30';
               label = `${d.total_runs}wd`;
             } else if (d.is_noball) {
-              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30';
               label = `${d.total_runs}nb`;
             } else if (d.total_runs === 0) {
-              badgeColor = 'bg-slate-900 text-slate-500 border-slate-800';
+              badgeColor = 'bg-slate-900 text-slate-500 border-slate-800 hover:border-slate-600';
               label = '•';
             }
 
+            const isCurrent = d.delivery_idx === currentDelivery.delivery_idx;
+
             return (
-              <span
+              <button
                 key={d.delivery_idx}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono-numbers border ${badgeColor}`}
-                title={`Over ${d.display_over}: ${d.event_description}`}
+                type="button"
+                onClick={() => onSeek?.(d.delivery_idx)}
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono-numbers border transition-all cursor-pointer ${badgeColor} ${
+                  isCurrent ? 'ring-2 ring-emerald-400 shadow-sm' : ''
+                }`}
+                title={`Click to jump to Over ${d.display_over}: ${d.event_description}`}
               >
                 {label}
-              </span>
+              </button>
             );
           })}
         </div>

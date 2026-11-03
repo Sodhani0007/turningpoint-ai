@@ -10,7 +10,7 @@ import {
   ReferenceDot,
 } from 'recharts';
 import { DeliveryEvent, TurningPoint } from '../types/cricket';
-import { Eye, EyeOff, Zap, Info } from 'lucide-react';
+import { Eye, EyeOff, Zap, Flame } from 'lucide-react';
 
 interface WinProbabilityChartProps {
   deliveries: DeliveryEvent[];
@@ -46,7 +46,6 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
         batter: d.batter,
         bowler: d.bowler,
         event: d.event_description,
-        // Only reveal if full match analysis is on OR delivery has happened in replay
         win_probability: (fullMatchAnalysis || isPastOrCurrent) ? Math.round(probValue * 10) / 10 : null,
         actual_prob: Math.round(probValue * 10) / 10,
         isCurrent: idx === currentDeliveryIndex,
@@ -58,7 +57,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
   const currentProb = currentDel?.win_probability !== null ? currentDel.win_probability * 100 : 50;
 
   return (
-    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-5 shadow-2xl relative">
+    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-5 shadow-2xl relative" data-testid="win-probability-chart-card">
       {/* Top Header of Chart */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div>
@@ -85,6 +84,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
                 ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-300'
                 : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-300'
             }`}
+            data-testid="toggle-full-timeline-btn"
           >
             {fullMatchAnalysis ? (
               <>
@@ -107,12 +107,10 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
           <AreaChart
             data={chartData}
             margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-            onClick={(e) => {
-              if (e && e.activePayload && e.activePayload[0]) {
-                const clickedIdx = e.activePayload[0].payload.idx;
-                if (typeof clickedIdx === 'number') {
-                  onSeek(clickedIdx);
-                }
+            onClick={(e: any) => {
+              const clickedIdx = e?.activePayload?.[0]?.payload?.idx ?? e?.activeTooltipIndex;
+              if (typeof clickedIdx === 'number' && clickedIdx >= 0 && clickedIdx < deliveries.length) {
+                onSeek(clickedIdx);
               }
             }}
           >
@@ -199,25 +197,39 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
+                  const prob = data.win_probability;
+                  const isChasingFavored = prob !== null && prob >= 50;
+
                   return (
-                    <div className="bg-slate-900 border border-slate-700/80 rounded-xl p-3 shadow-2xl text-xs max-w-xs">
-                      <div className="flex items-center justify-between font-bold text-slate-200 border-b border-slate-800 pb-1.5 mb-1.5">
-                        <span className="font-mono-numbers">Over {data.display_over}</span>
-                        <span className="text-emerald-400 font-mono-numbers">
-                          Win Prob: {data.win_probability !== null ? `${data.win_probability}%` : 'Hidden'}
+                    <div className="bg-slate-900/95 border border-slate-700 p-3 rounded-xl shadow-2xl backdrop-blur-md text-xs min-w-[200px]">
+                      <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800">
+                        <span className="font-bold text-slate-200 font-mono-numbers">
+                          Over {data.display_over}
+                        </span>
+                        <span
+                          className={`font-black font-mono-numbers ${
+                            isChasingFavored ? 'text-emerald-400' : 'text-cyan-400'
+                          }`}
+                        >
+                          {prob !== null ? `${prob}% Win Prob` : 'Future ball (hidden)'}
                         </span>
                       </div>
-                      <div className="text-slate-300 font-mono-numbers">
-                        Score: {data.score}/{data.wickets} (Need {data.runs_required})
-                      </div>
-                      <div className="text-slate-400 text-[11px] mt-1">
-                        {data.bowler} to {data.batter}
-                      </div>
-                      <div className="text-slate-300 font-medium italic mt-0.5">
-                        {data.event}
-                      </div>
-                      <div className="mt-2 text-[10px] text-cyan-400 font-medium">
-                        Click anywhere to seek to this delivery
+                      <div className="space-y-1 text-slate-300">
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Score:</span>
+                          <span className="font-mono-numbers font-semibold text-white">
+                            {data.score}/{data.wickets}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500">Need:</span>
+                          <span className="font-mono-numbers text-amber-300">
+                            {data.runs_required} runs
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 italic pt-1 truncate max-w-[220px]">
+                          {data.bowler} → {data.batter}: {data.event}
+                        </div>
                       </div>
                     </div>
                   );
@@ -239,27 +251,37 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
         </ResponsiveContainer>
       </div>
 
-      {/* Timeline Footer Legend */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mt-3 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-emerald-500/80 border border-white/50" />
-            <span>Positive Shift (+TP)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-rose-500/80 border border-white/50" />
-            <span>Wicket / Collapse (-TP)</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-0.5 bg-emerald-400" />
-            <span>Current Ball Marker</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1 text-slate-400">
-          <Info className="w-3 h-3 text-cyan-400" />
-          <span>Interactive timeline: Click any point to seek</span>
-        </div>
+      {/* Mini Turning Point Jump Bar under the Chart */}
+      <div className="mt-3 pt-3 border-t border-slate-800/80 flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+          <Flame className="w-3.5 h-3.5 text-amber-400" />
+          Turning Points:
+        </span>
+        {turningPoints.map((tp, idx) => {
+          const isSelected = tp.end_delivery_idx === currentDeliveryIndex;
+          const isPositive = tp.shift_percentage > 0;
+          return (
+            <button
+              key={tp.id}
+              onClick={() => {
+                onSeek(tp.end_delivery_idx);
+                onSelectTurningPoint(tp);
+              }}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono-numbers border transition-all cursor-pointer ${
+                isSelected
+                  ? 'bg-emerald-500/20 border-emerald-500/60 text-emerald-300 font-bold shadow-[0_0_10px_rgba(16,185,129,0.3)]'
+                  : 'bg-slate-900/80 hover:bg-slate-800 border-slate-800 text-slate-300'
+              }`}
+              title={`Jump to ${tp.over_label}: ${tp.summary}`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${isPositive ? 'bg-emerald-400' : 'bg-rose-400'}`} />
+              <span>TP#{idx + 1} ({tp.over_label})</span>
+              <span className={isPositive ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
+                {isPositive ? '+' : ''}{tp.shift_percentage}%
+              </span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );

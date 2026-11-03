@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ExplainResponse, TurningPoint } from '../types/cricket';
 import { X, Sparkles, ShieldCheck, Cpu, ArrowUpRight, ArrowDownRight, Send, ListChecks } from 'lucide-react';
 
@@ -21,6 +21,17 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
 }) => {
   const [customQuestion, setCustomQuestion] = useState('');
 
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !turningPoint) return null;
 
   const isPositive = turningPoint.shift_percentage > 0;
@@ -33,9 +44,22 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
     setCustomQuestion('');
   };
 
+  // Determine source label and icon
+  const source = explanation?.source;
+  const isLive = source === 'live_llm' || source === 'ai_live';
+  const isPrecomputedLlm = source === 'precomputed_llm';
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-[#0e1422] border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+      data-testid="explanation-modal-backdrop"
+    >
+      <div
+        className="bg-[#0e1422] border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+        data-testid="explanation-modal-card"
+      >
         {/* Modal Header */}
         <div className="p-4 sm:p-5 border-b border-slate-800 flex items-start justify-between gap-3 bg-slate-900/50">
           <div className="flex items-start gap-3">
@@ -43,7 +67,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <span className="text-xs uppercase tracking-wider font-bold text-slate-400 font-display">
                   Momentum Shift Explanation
                 </span>
@@ -57,23 +81,32 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                   {isPositive ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                   {shiftText}
                 </span>
+
                 {explanation && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 flex items-center gap-1">
-                    {explanation.source === 'ai_live' ? (
+                  <span
+                    className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-300 flex items-center gap-1"
+                    data-testid="explanation-source-badge"
+                  >
+                    {isLive ? (
                       <>
                         <Cpu className="w-3 h-3 text-emerald-400" />
-                        <span>Live AI Model</span>
+                        <span>Live AI ({explanation.llm_metadata?.model || 'LLM'})</span>
+                      </>
+                    ) : isPrecomputedLlm ? (
+                      <>
+                        <Sparkles className="w-3 h-3 text-cyan-400" />
+                        <span>Precomputed Grounded AI</span>
                       </>
                     ) : (
                       <>
-                        <ShieldCheck className="w-3 h-3 text-cyan-400" />
-                        <span>Verified Precomputed Analysis</span>
+                        <ShieldCheck className="w-3 h-3 text-amber-400" />
+                        <span>Deterministic Evidence Grounding</span>
                       </>
                     )}
                   </span>
                 )}
               </div>
-              <h2 className="text-base sm:text-lg font-bold text-white">
+              <h2 className="text-base sm:text-lg font-bold text-white" data-testid="explanation-headline">
                 {explanation?.headline || turningPoint.over_label}
               </h2>
             </div>
@@ -81,7 +114,9 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            data-testid="close-explanation-modal-btn"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+            title="Close (Esc)"
           >
             <X className="w-5 h-5" />
           </button>
@@ -90,7 +125,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-sm text-slate-300">
           {isLoading ? (
-            <div className="py-12 flex flex-col items-center justify-center gap-3 text-center">
+            <div className="py-12 flex flex-col items-center justify-center gap-3 text-center" data-testid="explanation-loading-spinner">
               <div className="w-8 h-8 border-3 border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
               <p className="text-sm text-slate-400 font-medium">
                 Synthesizing evidence-grounded momentum analysis...
@@ -103,7 +138,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                 <div className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 mb-1.5">
                   AI Tactical & Statistical Breakdown
                 </div>
-                <p className="text-sm sm:text-base leading-relaxed text-slate-200">
+                <p className="text-sm sm:text-base leading-relaxed text-slate-200" data-testid="explanation-text">
                   {explanation.explanation}
                 </p>
               </div>
@@ -113,7 +148,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                 <div className="text-[11px] font-semibold uppercase tracking-wider text-cyan-400 mb-1">
                   Key Takeaway
                 </div>
-                <p className="text-xs sm:text-sm text-cyan-200 font-medium">
+                <p className="text-xs sm:text-sm text-cyan-200 font-medium" data-testid="explanation-takeaway">
                   {explanation.takeaway}
                 </p>
               </div>
@@ -193,11 +228,13 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
             value={customQuestion}
             onChange={(e) => setCustomQuestion(e.target.value)}
             disabled={isLoading}
+            data-testid="custom-prompt-input"
             className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500/60"
           />
           <button
             type="submit"
             disabled={!customQuestion.trim() || isLoading}
+            data-testid="submit-custom-prompt-btn"
             className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
