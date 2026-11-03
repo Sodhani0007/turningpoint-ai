@@ -209,6 +209,15 @@ docker run -p 8000:8000 turningpoint-ai-backend
 
 ---
 
+## 10. AI Tool Disclosure & Provenance
+
+In accordance with academic and engineering integrity guidelines:
+- **Architectural Design & Scaffolding:** Antigravity (powered by Gemini) was utilized as an agentic pair programmer to structure schemas, implement deterministic cricket accounting, and scaffold the React + FastAPI architecture.
+- **Machine Learning Engine:** The win-probability model is a genuine scikit-learn model trained locally on 137,500 real IPL deliveries with 5-fold cross-validated sigmoid probability calibration; no synthetic probabilities or random heuristics were used.
+- **Momentum Explanations:** Explanations are evidence-grounded natural-language analyses generated following strict system instructions prohibiting future data leakage, hallucinated scores, or ungrounded causality. The application supports live Groq/OpenAI LLM inference while bundling verified precomputed explanations for zero-key offline reliability.
+
+---
+
 ## Dream11 Submission Note (< 200 words)
 
 > **TurningPoint AI** is an AI-powered cricket companion built for the Dream11 FDE Internship Assignment. It transforms raw ball-by-ball match data into explainable momentum intelligence.
