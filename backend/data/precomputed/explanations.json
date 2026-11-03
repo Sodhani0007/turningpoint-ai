@@ -2,10 +2,10 @@
   "1181768_tp_1181768_1": {
     "turning_point_id": "tp_1181768_1",
     "match_id": "1181768",
-    "headline": "-74.1% Shift: Over 18.6 - 19.6",
-    "explanation": "During Over 18.6 - 19.6 bowled by SL Malinga, 2 crucial wickets fell and 7 runs were scored. The required run rate shifted from 9.0 to 999.0, causing the win probability model to adjust its estimate by 74.1% against Chennai Super Kings.",
-    "takeaway": "Wickets and boundary frequency in Over 18.6 - 19.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Malinga's Last-Over Masterclass and Watson Run Out (-74.1%)",
+    "explanation": "CSK entered the 20th over needing 9 runs off 6 balls with win probability at 74.1%. Lasith Malinga conceded just 4 runs off the first three balls, and Shane Watson (80) was run out attempting a second run on 19.4. With 2 runs needed off the final delivery, Malinga trapped Shardul Thakur LBW, securing a 1-run championship victory for Mumbai Indians.",
+    "takeaway": "Two wickets and only 4 runs conceded in the final four deliveries reversed CSK's high probability into a 1-run defeat.",
+    "confidence_notes": "Wicket events verified: Watson run out on 19.4 and Thakur LBW on 19.6.",
     "supporting_delivery_ids": [
       118,
       119,
@@ -150,10 +150,10 @@
   "1181768_tp_1181768_2": {
     "turning_point_id": "tp_1181768_2",
     "match_id": "1181768",
-    "headline": "+53.4% Shift: Over 17.1 - 17.4",
-    "explanation": "During Over 17.1 - 17.4 bowled by KH Pandya, a flurry of boundaries produced 18 runs. The required run rate shifted from 13.06 to 8.14, causing the win probability model to adjust its estimate by 53.4% in favor of Chennai Super Kings.",
-    "takeaway": "Wickets and boundary frequency in Over 17.1 - 17.4 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Shane Watson Smashes Three Consecutive Sixes off Krunal (+53.4%)",
+    "explanation": "Between 17.1 and 17.4, Shane Watson dismantled Krunal Pandya with three consecutive sixes, generating 18 runs in four deliveries. The required equation plunged from 37 runs needed off 17 balls down to 19 off 14, driving CSK's win probability from 29.5% up to 83.0%.",
+    "takeaway": "Three maximums in consecutive legal deliveries dramatically reduced the required run rate from 13.06 to 8.14.",
+    "confidence_notes": "Deliveries 106-109 show three straight sixes by SR Watson.",
     "supporting_delivery_ids": [
       107,
       108,
@@ -244,10 +244,10 @@
   "1181768_tp_1181768_3": {
     "turning_point_id": "tp_1181768_3",
     "match_id": "1181768",
-    "headline": "+32.3% Shift: Over 14.5 - 15.5",
-    "explanation": "During Over 14.5 - 15.5 bowled by SL Malinga, a flurry of boundaries produced 20 runs. The required run rate shifted from 12.19 to 10.32, causing the win probability model to adjust its estimate by 32.3% in favor of Chennai Super Kings.",
-    "takeaway": "Wickets and boundary frequency in Over 14.5 - 15.5 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Watson & Bravo Plunder 20 Runs off Malinga's 16th Over (+32.3%)",
+    "explanation": "Facing a steep required rate in Over 15.1 to 15.5, Dwayne Bravo hit a six and Shane Watson followed with three consecutive boundaries against Lasith Malinga. The 20-run burst brought CSK from 87/4 to 107/4, elevating win probability from 18.6% to 50.9% and resetting match parity.",
+    "takeaway": "Four boundaries in five deliveries revived a flagging chase, cutting required runs to 43 off 25 balls.",
+    "confidence_notes": "Deliveries 94-98 record one six and three fours against Malinga.",
     "supporting_delivery_ids": [
       93,
       94,
@@ -381,10 +381,10 @@
   "1181768_tp_1181768_4": {
     "turning_point_id": "tp_1181768_4",
     "match_id": "1181768",
-    "headline": "-32.2% Shift: Over 17.4 - 18.4",
-    "explanation": "During Over 17.4 - 18.4 bowled by KH Pandya, 1 crucial wicket fell and disciplined bowling conceded just 4 run(s). The required run rate shifted from 8.14 to 11.25, causing the win probability model to adjust its estimate by 32.2% against Chennai Super Kings.",
-    "takeaway": "Wickets and boundary frequency in Over 17.4 - 18.4 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Jasprit Bumrah's 19th Over Dismissal of Bravo Restricts CSK (-32.2%)",
+    "explanation": "With CSK in a strong position needing 18 off 12 balls, Jasprit Bumrah bowled a disciplined 19th over. Bumrah had Dwayne Bravo caught behind by De Kock on 18.2 while conceding only 4 runs across the window, dragging CSK's probability down from 83.0% to 50.8%.",
+    "takeaway": "Conceding no boundaries and removing a recognized batter in the penultimate over shifted pressure back to the chasing side.",
+    "confidence_notes": "Wicket of DJ Bravo confirmed on delivery 113 with only 4 runs conceded across 7 balls.",
     "supporting_delivery_ids": [
       110,
       111,
@@ -524,10 +524,10 @@
   "1181768_tp_1181768_5": {
     "turning_point_id": "tp_1181768_5",
     "match_id": "1181768",
-    "headline": "-21.4% Shift: Over 9.6 - 10.6",
-    "explanation": "During Over 9.6 - 10.6 bowled by JJ Bumrah, 1 crucial wicket fell and disciplined bowling conceded just 1 run(s). The required run rate shifted from 7.8 to 8.56, causing the win probability model to adjust its estimate by 21.4% against Chennai Super Kings.",
-    "takeaway": "Wickets and boundary frequency in Over 9.6 - 10.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Bumrah Dismisses Rayudu and Strangles Dhoni in Maiden Spell (-21.4%)",
+    "explanation": "In Over 10.1 to 10.6, Jasprit Bumrah conceded just 1 run and dismissed Ambati Rayudu caught behind on 10.3. Bumrah then bowled three consecutive dot balls to new batter MS Dhoni, dropping CSK's probability from 75.3% to 53.9% as the required rate steadily climbed.",
+    "takeaway": "A wicket maiden-like over in the middle phase stemmed run flow and increased required rate pressure.",
+    "confidence_notes": "Scorecard confirms Rayudu caught behind on delivery 65 with four dot balls to follow.",
     "supporting_delivery_ids": [
       63,
       64,
@@ -667,10 +667,10 @@
   "1216527_tp_1216527_1": {
     "turning_point_id": "tp_1216527_1",
     "match_id": "1216527",
-    "headline": "+68.2% Shift: Over 16.4 - 17.4",
-    "explanation": "During Over 16.4 - 17.4 bowled by SS Cottrell, a flurry of boundaries produced 32 runs. The required run rate shifted from 17.7 to 11.57, causing the win probability model to adjust its estimate by 68.2% in favor of Rajasthan Royals.",
-    "takeaway": "Wickets and boundary frequency in Over 16.4 - 17.4 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Rahul Tewatia's 5 Sixes off Cottrell Stuns Punjab (+68.2%)",
+    "explanation": "Chasing a mammoth target of 224, Rajasthan Royals were languishing with Rahul Tewatia on 8 off 19 balls. In Over 17.1 to 17.6, Tewatia struck five sixes off Sheldon Cottrell in a 30-run over. This scoring surge lowered the equation from 51 needed off 18 balls to 21 off 12, surging RR's win probability from 19.8% to 88.0%.",
+    "takeaway": "Thirty runs in six legal balls completely inverted a failing chase, transforming an improbable equation into a dominant position.",
+    "confidence_notes": "Deliveries 108 to 113 confirm five sixes and one dot ball off SS Cottrell.",
     "supporting_delivery_ids": [
       106,
       107,
@@ -804,10 +804,10 @@
   "1216527_tp_1216527_2": {
     "turning_point_id": "tp_1216527_2",
     "match_id": "1216527",
-    "headline": "+34.8% Shift: Over 17.2 - 18.2",
-    "explanation": "During Over 17.2 - 18.2 bowled by Mohammed Shami, 1 crucial wicket fell and a flurry of boundaries produced 24 runs. The required run rate shifted from 14.62 to 9.0, causing the win probability model to adjust its estimate by 34.8% in favor of Rajasthan Royals.",
-    "takeaway": "Wickets and boundary frequency in Over 17.2 - 18.2 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Jofra Archer & Tewatia Blast 24 Runs off Shami (+34.8%)",
+    "explanation": "Maintaining aggressive momentum in Over 17.2 to 18.2, Jofra Archer and Tewatia took 24 runs off Mohammed Shami. Archer smashed two consecutive sixes before Tewatia added another, cutting the required runs to just 2 off 7 deliveries despite Tewatia's eventual dismissal.",
+    "takeaway": "Three consecutive sixes in the 19th over effectively closed out the record-breaking chase of 224.",
+    "confidence_notes": "Deliveries 114 to 119 record 24 runs with three maximums.",
     "supporting_delivery_ids": [
       110,
       111,
@@ -947,10 +947,10 @@
   "1216527_tp_1216527_3": {
     "turning_point_id": "tp_1216527_3",
     "match_id": "1216527",
-    "headline": "+23.6% Shift: Over 14.6 - 15.6",
-    "explanation": "During Over 14.6 - 15.6 bowled by GJ Maxwell, a flurry of boundaries produced 21 runs. The required run rate shifted from 16.8 to 15.75, causing the win probability model to adjust its estimate by 23.6% in favor of Rajasthan Royals.",
-    "takeaway": "Wickets and boundary frequency in Over 14.6 - 15.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Sanju Samson Unleashes 21-Run Assault on Maxwell (+23.6%)",
+    "explanation": "Between Over 14.6 and 15.6, Sanju Samson attacked Glenn Maxwell, hitting three sixes to produce a 21-run over. The assault lifted Rajasthan's score from 140/2 to 161/2, lifting win probability from 25.1% to 48.7% and keeping RR in contention with required rates.",
+    "takeaway": "A multi-six over from Samson bridged the run-rate deficit against spin in the middle overs.",
+    "confidence_notes": "Deliveries 94 to 99 show three sixes and a boundary totaling 21 runs.",
     "supporting_delivery_ids": [
       96,
       97,
@@ -1083,10 +1083,10 @@
   "1216527_tp_1216527_4": {
     "turning_point_id": "tp_1216527_4",
     "match_id": "1216527",
-    "headline": "-21.2% Shift: Over 15.5 - 16.2",
-    "explanation": "During Over 15.5 - 16.2 bowled by GJ Maxwell, 1 crucial wicket fell and disciplined bowling conceded just 2 run(s). The required run rate shifted from 15.36 to 16.91, causing the win probability model to adjust its estimate by 21.2% against Rajasthan Royals.",
-    "takeaway": "Wickets and boundary frequency in Over 15.5 - 16.2 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Shami Removes Settled Samson (85) as Tewatia Struggles (-21.2%)",
+    "explanation": "Mohammed Shami broke Rajasthan's momentum by having Sanju Samson caught behind for 85 on 16.1. With Rahul Tewatia unable to rotate strike, Punjab restricted RR to only 2 runs in this phase, dropping Rajasthan's win probability from 41.0% to 19.8%.",
+    "takeaway": "Dismissing the primary scoring batter while the partner was struggling placed the chase in extreme jeopardy.",
+    "confidence_notes": "Wicket of Samson confirmed on delivery 102 with dot balls ensuing.",
     "supporting_delivery_ids": [
       101,
       102,
@@ -1183,10 +1183,10 @@
   "1216527_tp_1216527_5": {
     "turning_point_id": "tp_1216527_5",
     "match_id": "1216527",
-    "headline": "-20.9% Shift: Over 8.5 - 9.5",
-    "explanation": "During Over 8.5 - 9.5 bowled by GJ Maxwell, 1 crucial wicket fell and disciplined bowling conceded just 3 run(s). The required run rate shifted from 11.1 to 11.9, causing the win probability model to adjust its estimate by 20.9% against Rajasthan Royals.",
-    "takeaway": "Wickets and boundary frequency in Over 8.5 - 9.5 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Glenn Maxwell Dismisses Steve Smith for 50 (-20.9%)",
+    "explanation": "In Over 8.5 to 9.5, Glenn Maxwell broke a threatening 81-run partnership by having Steve Smith caught at deep cover for 50. Conceding only 3 runs in the window, Maxwell's strike pegged RR back from 100/1 to 103/2, dropping their win probability from 48.2% to 27.3%.",
+    "takeaway": "Removing an established half-centurion checked Rajasthan's run-scoring rate during the middle overs.",
+    "confidence_notes": "Steve Smith dismissed on delivery 56 (caught Shami) followed by tight bowling.",
     "supporting_delivery_ids": [
       58,
       59,
@@ -1326,10 +1326,10 @@
   "1254084_tp_1254084_1": {
     "turning_point_id": "tp_1254084_1",
     "match_id": "1254084",
-    "headline": "+96.5% Shift: Over 19.4 - 19.6",
-    "explanation": "During Over 19.4 - 19.6 bowled by L Ngidi, 8 runs were scored. The required run rate shifted from 24.0 to 0.0, causing the win probability model to adjust its estimate by 96.5% in favor of Mumbai Indians.",
-    "takeaway": "Wickets and boundary frequency in Over 19.4 - 19.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Pollard Scampers 2 off Last Ball to Complete 219 Chase (+96.5%)",
+    "explanation": "Facing Lungi Ngidi in the 20th over needing 8 off the final 3 deliveries, Kieron Pollard hit a boundary on 19.4, refused a single on 19.5, and scampered two runs off the final ball. Mumbai Indians finished at 219/6, reaching their target on the absolute last delivery of the 20 overs.",
+    "takeaway": "Pollard's calculated boundary and final-ball double sealed Mumbai's highest successful run chase in IPL history.",
+    "confidence_notes": "Deliveries 125-127 show 4, dot, and 2 runs to reach target 219.",
     "supporting_delivery_ids": [
       126,
       127
@@ -1406,10 +1406,10 @@
   "1254084_tp_1254084_2": {
     "turning_point_id": "tp_1254084_2",
     "match_id": "1254084",
-    "headline": "-64.0% Shift: Over 18.2 - 19.2",
-    "explanation": "During Over 18.2 - 19.2 bowled by SM Curran, 2 crucial wickets fell and 7 runs were scored. The required run rate shifted from 11.4 to 18.0, causing the win probability model to adjust its estimate by 64.0% against Mumbai Indians.",
-    "takeaway": "Wickets and boundary frequency in Over 18.2 - 19.2 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Sam Curran's Penultimate Over Wicket Puts MI on the Brink (-64.0%)",
+    "explanation": "Sam Curran bowled a clutch 19th over between 18.2 and 19.2, trapping Krunal Pandya LBW and conceding only 7 runs. With the required rate escalating and Mumbai needing 16 off the final six balls, MI's win probability collapsed from 88.0% to 24.0%.",
+    "takeaway": "Curran's yorkers and dismissal of Krunal forced Mumbai to require 16 off the 20th over.",
+    "confidence_notes": "Wicket of KH Pandya (LBW) on delivery 119 with only singles conceded.",
     "supporting_delivery_ids": [
       118,
       119,
@@ -1554,10 +1554,10 @@
   "1254084_tp_1254084_3": {
     "turning_point_id": "tp_1254084_3",
     "match_id": "1254084",
-    "headline": "-45.4% Shift: Over 15.6 - 16.6",
-    "explanation": "During Over 15.6 - 16.6 bowled by SM Curran, 1 crucial wicket fell and disciplined bowling conceded just 2 run(s). The required run rate shifted from 12.5 to 16.0, causing the win probability model to adjust its estimate by 45.4% against Mumbai Indians.",
-    "takeaway": "Wickets and boundary frequency in Over 15.6 - 16.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Curran Removes Hardik Pandya in 2-Run Death Over (-45.4%)",
+    "explanation": "In Over 15.6 to 16.6, Sam Curran choked Mumbai's death-over acceleration by removing Hardik Pandya caught by Faf du Plessis for 16, conceding just 2 runs in the over. Mumbai dropped from 170/4 to 172/5, dropping their win probability from 70.8% down to 25.4%.",
+    "takeaway": "A single wicket and only two singles in the 17th over placed the entire chase burden on Pollard.",
+    "confidence_notes": "Hardik Pandya dismissed on delivery 105; over yielded just 2 singles.",
     "supporting_delivery_ids": [
       102,
       103,
@@ -1697,10 +1697,10 @@
   "1254084_tp_1254084_4": {
     "turning_point_id": "tp_1254084_4",
     "match_id": "1254084",
-    "headline": "+44.4% Shift: Over 17.6 - 18.3",
-    "explanation": "During Over 17.6 - 18.3 bowled by SM Curran, 14 runs were scored. The required run rate shifted from 15.5 to 11.33, causing the win probability model to adjust its estimate by 44.4% in favor of Mumbai Indians.",
-    "takeaway": "Wickets and boundary frequency in Over 17.6 - 18.3 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Pandya Brothers and Pollard Launch Late Counter-Offensive (+44.4%)",
+    "explanation": "Between 17.6 and 18.3, Kieron Pollard and Krunal Pandya counter-attacked Shardul Thakur and Sam Curran, striking two boundaries and a six for 14 runs in four deliveries. This pushed MI from 187/5 to 201/5, surging win probability from 43.6% to 88.0%.",
+    "takeaway": "Four consecutive high-scoring deliveries restored Mumbai's momentum ahead of the final overs.",
+    "confidence_notes": "Deliveries 112 to 116 show 14 runs scored including two boundaries.",
     "supporting_delivery_ids": [
       116,
       117,
@@ -1791,10 +1791,10 @@
   "1254084_tp_1254084_5": {
     "turning_point_id": "tp_1254084_5",
     "match_id": "1254084",
-    "headline": "+35.0% Shift: Over 14.1 (wd) - 14.5 (wd)",
-    "explanation": "During Over 14.1 (wd) - 14.5 (wd) bowled by SN Thakur, a flurry of boundaries produced 20 runs. The required run rate shifted from 14.67 to 12.75, causing the win probability model to adjust its estimate by 35.0% in favor of Mumbai Indians.",
-    "takeaway": "Wickets and boundary frequency in Over 14.1 (wd) - 14.5 (wd) substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Pollard Takes 20 Runs off Shardul Thakur's 15th Over (+35.0%)",
+    "explanation": "Facing an imposing target of 219, Kieron Pollard ignited Mumbai's chase in Over 14.1 to 14.5 by smashing Shardul Thakur for three boundaries and a six. The 20-run over reduced the required runs from 89 off 36 balls down to 68 off 32, raising MI's probability from 23.1% to 58.1%.",
+    "takeaway": "A 20-run burst by Pollard flipped the momentum and brought Mumbai back to parity in the chase.",
+    "confidence_notes": "Deliveries 89-93 detail 20 runs including three boundaries and a wide.",
     "supporting_delivery_ids": [
       88,
       89,
@@ -1927,10 +1927,10 @@
   "1359487_tp_1359487_1": {
     "turning_point_id": "tp_1359487_1",
     "match_id": "1359487",
-    "headline": "+99.9% Shift: Over 19.1 - 19.6",
-    "explanation": "During Over 19.1 - 19.6 bowled by Yash Dayal, a flurry of boundaries produced 30 runs. The required run rate shifted from 33.6 to 0.0, causing the win probability model to adjust its estimate by 99.9% in favor of Kolkata Knight Riders.",
-    "takeaway": "Wickets and boundary frequency in Over 19.1 - 19.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Rinku Singh's 5 Consecutive Sixes Seal Historic Chase (+99.9%)",
+    "explanation": "Entering the final over, Kolkata Knight Riders required 29 runs with the model estimating a 0.1% win probability. After Umesh Yadav rotated strike with a single, Rinku Singh scored 30 runs off the final five deliveries against Yash Dayal (6, 6, 6, 6, 6). The required run rate dropped from 33.6 to zero as KKR successfully reached 207/7 on the final ball.",
+    "takeaway": "An extraordinary 30-run sequence off five legal deliveries converted an equation of 28 needed off 5 balls into a 3-wicket victory.",
+    "confidence_notes": "Grounded strictly in verified second-innings scorecard events and ball-by-ball tracking.",
     "supporting_delivery_ids": [
       118,
       119,
@@ -2049,10 +2049,10 @@
   "1359487_tp_1359487_2": {
     "turning_point_id": "tp_1359487_2",
     "match_id": "1359487",
-    "headline": "-58.4% Shift: Over 15.4 - 16.4",
-    "explanation": "During Over 15.4 - 16.4 bowled by Rashid Khan, 4 crucial wickets fell and disciplined bowling conceded just 1 run(s). The required run rate shifted from 11.77 to 15.0, causing the win probability model to adjust its estimate by 58.4% against Kolkata Knight Riders.",
-    "takeaway": "Wickets and boundary frequency in Over 15.4 - 16.4 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Rashid Khan Hat-Trick Demolishes KKR Middle Order (-58.4%)",
+    "explanation": "Over 15.4 to 16.4 produced a collapse of 4 wickets for just 1 run across six deliveries. After Alzarri Joseph removed Venkatesh Iyer (154/4), Rashid Khan claimed a hat-trick by dismissing Andre Russell, Sunil Narine, and Shardul Thakur on consecutive balls. The model win probability plummeted from 66.1% to 7.7% as KKR lost all recognized middle-order resources with 50 runs still required off 20 balls.",
+    "takeaway": "Three consecutive dismissals in a single over eliminated batting depth, severely inflating the required rate.",
+    "confidence_notes": "Scorecard confirms 4 wickets across deliveries 95 to 99 with zero boundaries conceded.",
     "supporting_delivery_ids": [
       95,
       96,
@@ -2209,10 +2209,10 @@
   "1359487_tp_1359487_3": {
     "turning_point_id": "tp_1359487_3",
     "match_id": "1359487",
-    "headline": "+29.0% Shift: Over 10.2 - 11.2",
-    "explanation": "During Over 10.2 - 11.2 bowled by Yash Dayal, a flurry of boundaries produced 22 runs. The required run rate shifted from 12.21 to 11.08, causing the win probability model to adjust its estimate by 29.0% in favor of Kolkata Knight Riders.",
-    "takeaway": "Wickets and boundary frequency in Over 10.2 - 11.2 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Iyer & Rana Counter-Attack Against Spin and Pace (+29.0%)",
+    "explanation": "Between Over 10.2 and 11.2, Venkatesh Iyer and Nitish Rana accelerated, accumulating 22 runs off 6 deliveries. The scoring sequence included two boundaries and two sixes against Rashid Khan and Yash Dayal. This scoring burst reduced the required total from 118 off 58 balls down to 96 off 52, raising KKR's win probability from 24.6% to 53.6%.",
+    "takeaway": "High boundary frequency against frontline bowling shifted the run-rate balance in KKR's favor.",
+    "confidence_notes": "Deliveries 61-67 show 22 runs scored without losing a wicket.",
     "supporting_delivery_ids": [
       62,
       63,
@@ -2346,10 +2346,10 @@
   "1359487_tp_1359487_4": {
     "turning_point_id": "tp_1359487_4",
     "match_id": "1359487",
-    "headline": "-27.1% Shift: Over 12.3 - 13.3",
-    "explanation": "During Over 12.3 - 13.3 bowled by Rashid Khan, 1 crucial wicket fell and disciplined bowling conceded just 3 run(s). The required run rate shifted from 10.67 to 11.85, causing the win probability model to adjust its estimate by 27.1% against Kolkata Knight Riders.",
-    "takeaway": "Wickets and boundary frequency in Over 12.3 - 13.3 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Alzarri Joseph Wicket and Dot Balls Stagnate Chase (-27.1%)",
+    "explanation": "After KKR reached 128/2, Alzarri Joseph dismissed captain Nitish Rana on the first delivery of the 14th over, followed by two consecutive dot balls to new batter Rinku Singh. Conceding only 3 runs in the phase while capturing a settled top-order wicket reduced KKR's win probability from 71.6% to 44.5%.",
+    "takeaway": "A top-order dismissal combined with immediate dot balls arrested the scoring momentum.",
+    "confidence_notes": "Wicket of Nitish Rana (caught Shami) followed by consecutive dot balls verified on deliveries 78-80.",
     "supporting_delivery_ids": [
       75,
       76,
@@ -2489,10 +2489,10 @@
   "1359487_tp_1359487_5": {
     "turning_point_id": "tp_1359487_5",
     "match_id": "1359487",
-    "headline": "+24.2% Shift: Over 14.1 - 14.6",
-    "explanation": "During Over 14.1 - 14.6 bowled by J Little, 16 runs were scored. The required run rate shifted from 12.34 to 11.2, causing the win probability model to adjust its estimate by 24.2% in favor of Kolkata Knight Riders.",
-    "takeaway": "Wickets and boundary frequency in Over 14.1 - 14.6 substantially altered the required equation.",
-    "confidence_notes": "Deterministic evidence synthesis based strictly on second-innings scorecard events.",
+    "headline": "Venkatesh Iyer's 16-Run Over Off Little Re-Energizes Chase (+24.2%)",
+    "explanation": "In Over 14.1 to 14.6, Venkatesh Iyer attacked Josh Little, striking two boundaries and a six in an over that yielded 16 runs. The required runs came down from 72 off 35 balls to 56 off 30, lifting KKR's estimated win probability from 42.5% to 66.7%.",
+    "takeaway": "Taking 16 runs off the 15th over preserved manageable required rates heading into the death overs.",
+    "confidence_notes": "Deliveries 84 to 90 detail 16 total runs including an extra wide.",
     "supporting_delivery_ids": [
       85,
       86,
