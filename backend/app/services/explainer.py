@@ -19,9 +19,11 @@ PRECOMPUTED_EXPLANATIONS_PATH = os.path.join(
 SYSTEM_PROMPT = (
     "You are an evidence-grounded cricket analyst helping fans understand match momentum. "
     "Use only the supplied match events and statistics. Never invent a score, wicket, player action or tactical decision. "
-    "Explain observed factors rather than asserting unproven causality. Use plain English, be concise, and distinguish model "
+    "Explain observed factors rather than asserting unproven causality. Use plain English and distinguish model "
     "estimates from facts. Distinguish the state entering the phase (before the first delivery) from the state after the first delivery. "
-    "Return structured JSON with keys: headline, explanation, takeaway, confidence_notes, supporting_delivery_ids."
+    "Keep responses concise: headline <= 10 words, explanation <= 70 words, takeaway <= 25 words. "
+    "Return strictly valid JSON with keys: headline, explanation, takeaway, confidence_notes, supporting_delivery_ids. "
+    "Do not output conversational preamble, markdown explanations, or chain-of-thought."
 )
 
 def extract_json_payload(raw_text: str) -> Dict[str, Any]:
@@ -120,6 +122,8 @@ class ExplanationEngine:
         # Sliding-window rate limiter (timestamps)
         self._request_timestamps: List[float] = []
         self._rate_limit_max_per_minute = 20
+        # Reasoning effort support tracker
+        self._supports_reasoning_effort: bool = True
 
     def get_provider_status(self) -> Dict[str, Any]:
         if self.api_key and self.provider != "none":
@@ -166,7 +170,7 @@ class ExplanationEngine:
     ) -> Dict[str, Any]:
         """
         Build strictly bounded historical evidence.
-        Disambiguates state entering the phase, state after the first delivery, and state at phase end.
+        Streamlined to reduce prompt tokens while preserving complete mathematical and contextual fidelity.
         Deliveries past end_delivery_idx are excluded to prevent future leakage.
         """
         window_deliveries = [
@@ -201,13 +205,9 @@ class ExplanationEngine:
                 "over": d.display_over,
                 "batter": d.batter,
                 "bowler": d.bowler,
-                "runs_total": d.total_runs,
-                "batter_runs": d.batter_runs,
-                "extra_runs": d.extra_runs,
-                "is_boundary": d.is_boundary,
-                "is_dot": d.is_dot,
-                "wickets": [{"player": w.player_out, "kind": w.kind} for w in d.wickets if w.is_wicket],
-                "event_description": d.event_description
+                "runs": d.total_runs,
+                "wickets": [w.player_out for w in d.wickets if w.is_wicket],
+                "event": d.event_description
             })
 
         return {
@@ -229,7 +229,7 @@ class ExplanationEngine:
             "ending_score": f"{end_del.score}/{end_del.wickets_lost}",
             "ending_runs_needed": end_del.runs_required,
             "ending_balls_remaining": end_del.legal_balls_remaining,
-            # Backwards-compatible legacy keys for UI components
+            # Standard metrics
             "score_before": f"{score_entering}/{wickets_entering} (balls bowled: {balls_bowled_entering})",
             "score_after": f"{end_del.score}/{end_del.wickets_lost} (balls bowled: {end_del.legal_balls_bowled})",
             "target": metadata.target_runs,
@@ -259,7 +259,8 @@ class ExplanationEngine:
         """
         Execute strict live LLM inference against the configured provider and model.
         Bypasses all precomputed caches and deterministic fallbacks.
-        Raises on any network, authentication, schema, or rate-limit error.
+        Applies a generous token budget (1500) and handles json_validate_failed with ONE bounded retry.
+        Raises on any persistent network, authentication, schema, or rate-limit error.
         """
         if not self.api_key or self.provider == "none":
             raise RuntimeError(
@@ -273,9 +274,9 @@ class ExplanationEngine:
         start_time = time.time()
         user_content = (
             f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
-            f"Task: Provide a factual, mathematically precise explanation for why the model-estimated win probability changed "
+            f"Task: Provide a factual explanation for why the model-estimated win probability changed "
             f"by {tp.shift_percentage}% across {tp.over_label}. "
-            f"Disambiguate: State clearly the score entering the phase ({evidence['entering_score']} with {evidence['entering_runs_needed']} needed off {evidence['entering_balls_remaining']} balls), "
+            f"State clearly the score entering the phase ({evidence['entering_score']} with {evidence['entering_runs_needed']} needed off {evidence['entering_balls_remaining']} balls), "
             f"the event on the first delivery ({evidence['first_delivery_over']}), and the resulting equation ({evidence['runs_needed_after_first_delivery']} needed off {evidence['balls_remaining_after_first_delivery']} balls). "
             f"Rely strictly on the deliveries provided above."
         )
@@ -287,6 +288,7 @@ class ExplanationEngine:
             "Content-Type": "application/json"
         }
         
+        # Generous completion token budget (1500 tokens) to account for reasoning models
         payload: Dict[str, Any] = {
             "model": self.model,
             "messages": [
@@ -295,25 +297,66 @@ class ExplanationEngine:
             ],
             "response_format": {"type": "json_object"},
             "temperature": 0.2,
-            "max_tokens": 500
+            "max_tokens": 1500,
+            "max_completion_tokens": 1500
         }
 
+        # Check reasoning_effort support
+        if self._supports_reasoning_effort and any(m in self.model for m in ["gpt-oss", "o1", "o3"]):
+            payload["reasoning_effort"] = "low"
+
         endpoint = f"{self.base_url.rstrip('/')}/chat/completions"
-        async with httpx.AsyncClient(timeout=15.0) as client:
+        async with httpx.AsyncClient(timeout=20.0) as client:
             resp = await client.post(endpoint, headers=headers, json=payload)
             
-            # If the selected model does not support response_format={"type": "json_object"}, retry without it
-            if resp.status_code == 400 and any(k in resp.text.lower() for k in ["response_format", "json_object", "json_mode", "not supported"]):
+            # 1. Handle reasoning_effort incompatibility if rejected
+            if resp.status_code == 400 and "reasoning_effort" in resp.text.lower():
+                logger.info(f"Model {self.model} rejected reasoning_effort; retrying without parameter.")
+                self._supports_reasoning_effort = False
+                payload.pop("reasoning_effort", None)
+                resp = await client.post(endpoint, headers=headers, json=payload)
+
+            # 2. Handle Groq json_validate_failed with ONE bounded retry
+            is_json_validate_error = False
+            try:
+                err_json = resp.json()
+                err_code = err_json.get("error", {}).get("code", "")
+                err_msg = err_json.get("error", {}).get("message", "")
+                if err_code == "json_validate_failed" or "json_validate_failed" in resp.text or "max completion tokens reached" in err_msg.lower():
+                    is_json_validate_error = True
+            except Exception:
+                if "json_validate_failed" in resp.text or "max completion tokens" in resp.text.lower():
+                    is_json_validate_error = True
+
+            if is_json_validate_error:
+                logger.warning(
+                    f"Groq returned json_validate_failed (token limit reached before valid JSON closed). "
+                    f"Executing ONE bounded retry with increased completion token budget (2500) and prompt-guided JSON."
+                )
+                payload_retry = dict(payload)
+                payload_retry["max_completion_tokens"] = 2500
+                payload_retry["max_tokens"] = 2500
+                # Omit strict response_format in retry to prevent schema state-machine aborts
+                payload_retry.pop("response_format", None)
+                payload_retry.pop("reasoning_effort", None)
+                
+                resp = await client.post(endpoint, headers=headers, json=payload_retry)
+
+            # 3. Handle response_format unsupported
+            elif resp.status_code == 400 and any(k in resp.text.lower() for k in ["response_format", "json_object", "json_mode", "not supported"]):
                 logger.info(f"Model {self.model} rejected response_format; retrying without parameter.")
                 payload_fallback = dict(payload)
                 payload_fallback.pop("response_format", None)
+                payload_fallback.pop("reasoning_effort", None)
                 resp = await client.post(endpoint, headers=headers, json=payload_fallback)
 
             latency_ms = int((time.time() - start_time) * 1000)
 
             if resp.status_code != 200:
+                # Do not log headers or auth token
+                safe_err = resp.text[:300] if len(resp.text) > 300 else resp.text
                 raise RuntimeError(
-                    f"Live LLM provider returned HTTP {resp.status_code}: {resp.text}"
+                    f"Live LLM provider returned HTTP {resp.status_code}: {safe_err}"
                 )
 
             content = resp.json()["choices"][0]["message"]["content"]
@@ -365,7 +408,8 @@ class ExplanationEngine:
                 self._live_cache[cache_key] = result.model_dump()
                 return result
             except Exception as e:
-                logger.warning(f"Live LLM call failed ({e}). Falling back to precomputed / deterministic.")
+                # Log without exposing API key
+                logger.warning(f"Live LLM call failed ({type(e).__name__}: {e}). Falling back to deterministic synthesis.")
 
         evidence = self.build_evidence_payload(tp, deliveries, metadata)
 

@@ -1,3 +1,5 @@
+import json
+import asyncio
 import pytest
 from fastapi.testclient import TestClient
 from backend.app.main import app
@@ -111,9 +113,9 @@ def test_explain_sanitizes_hallucinated_delivery_ids():
     
     class MockHttpxResponse:
         status_code = 200
+        text = json.dumps({"choices": [{"message": {"content": json.dumps(fake_llm_json)}}]})
         def json(self):
-            import json
-            return {"choices": [{"message": {"content": json.dumps(fake_llm_json)}}]}
+            return json.loads(self.text)
 
     with patch("httpx.AsyncClient.post") as mock_post:
         import asyncio
@@ -187,3 +189,150 @@ def test_no_future_data_leakage_in_evidence():
     # Ensure evidence does NOT contain any delivery beyond tp_early.end_delivery_idx
     for d in evidence["deliveries"]:
         assert d["delivery_id"] <= tp_early.end_delivery_idx
+
+def test_groq_json_validate_failed_triggers_retry_and_succeeds():
+    import json
+    import asyncio
+    from unittest.mock import patch
+    from backend.app.services.explainer import ExplanationEngine
+
+    mock_engine = ExplanationEngine(api_key="gsk_dummy_test_key", provider="groq", model="openai/gpt-oss-20b")
+    
+    resp = client.get("/api/matches/1359487/replay")
+    match_data = resp.json()
+    metadata = MatchMetadata(**match_data["metadata"])
+    deliveries = [DeliveryEvent(**d) for d in match_data["deliveries"]]
+    tp = TurningPoint(**match_data["turning_points"][0])
+
+    calls = []
+
+    class MockFirstFailResponse:
+        status_code = 400
+        text = '{"error": {"message": "Failed to generate JSON. max completion tokens reached before generating a valid document", "type": "invalid_request_error", "code": "json_validate_failed"}}'
+        def json(self):
+            return json.loads(self.text)
+
+    class MockSecondSuccessResponse:
+        status_code = 200
+        text = json.dumps({
+            "choices": [{
+                "message": {
+                    "content": json.dumps({
+                        "headline": "Rinku Singh Historic Over",
+                        "explanation": "KKR entered over 19 at 176/7 needing 29 runs off 6 balls. A single brought score to 177/7 with 28 needed off 5 balls, followed by 5 consecutive sixes.",
+                        "takeaway": "Unprecedented 5 sixes in the final over.",
+                        "confidence_notes": "Grounded in observed delivery events.",
+                        "supporting_delivery_ids": [117, 118, 119, 120, 121, 122]
+                    })
+                }
+            }]
+        })
+        def json(self):
+            return json.loads(self.text)
+
+    async def mock_post(url, headers=None, json=None, **kwargs):
+        calls.append({"url": url, "headers": headers, "json": json})
+        if len(calls) == 1:
+            return MockFirstFailResponse()
+        return MockSecondSuccessResponse()
+
+    with patch("httpx.AsyncClient.post", side_effect=mock_post):
+        result = asyncio.run(mock_engine.explain_live_strict(tp, deliveries, metadata))
+        
+        assert len(calls) == 2, "Expected exactly one initial request and one bounded retry"
+        # Initial request checks
+        assert calls[0]["json"]["max_completion_tokens"] == 1500
+        assert "response_format" in calls[0]["json"]
+        # Bounded retry checks
+        assert calls[1]["json"]["max_completion_tokens"] == 2500
+        assert "response_format" not in calls[1]["json"], "response_format should be omitted in retry to avoid parser abort"
+        
+        # Result checks
+        assert result.source == "live_llm"
+        assert result.llm_metadata["model"] == "openai/gpt-oss-20b"
+        assert result.llm_metadata["provider"] == "groq"
+        assert len(result.supporting_delivery_ids) > 0
+
+def test_groq_json_validate_failed_retry_exhaustion_falls_back():
+    import json
+    import asyncio
+    from unittest.mock import patch
+    from backend.app.services.explainer import ExplanationEngine
+
+    mock_engine = ExplanationEngine(api_key="gsk_dummy_test_key", provider="groq", model="openai/gpt-oss-20b")
+    # Empty precomputed dict to ensure deterministic synthesis fallback
+    mock_engine.precomputed = {}
+    
+    resp = client.get("/api/matches/1359487/replay")
+    match_data = resp.json()
+    metadata = MatchMetadata(**match_data["metadata"])
+    deliveries = [DeliveryEvent(**d) for d in match_data["deliveries"]]
+    tp = TurningPoint(**match_data["turning_points"][0])
+
+    calls = []
+
+    class MockFailResponse:
+        status_code = 400
+        text = '{"error": {"message": "Failed to generate JSON. max completion tokens reached before generating a valid document", "type": "invalid_request_error", "code": "json_validate_failed"}}'
+        def json(self):
+            return json.loads(self.text)
+
+    async def mock_post(url, headers=None, json=None, **kwargs):
+        calls.append({"url": url, "headers": headers, "json": json})
+        return MockFailResponse()
+
+    with patch("httpx.AsyncClient.post", side_effect=mock_post):
+        # explain() catches error from explain_live_strict and safely falls back
+        result = asyncio.run(mock_engine.explain(tp, deliveries, metadata))
+        
+        assert len(calls) == 2, "Should attempt initial request + exactly 1 bounded retry before falling back"
+        assert result.source != "live_llm", "Never label an unsuccessful LLM inference as live_llm"
+        assert result.source == "deterministic_fallback"
+        assert result.llm_metadata is None
+
+def test_groq_request_payload_token_budget():
+    import json
+    import asyncio
+    from unittest.mock import patch
+    from backend.app.services.explainer import ExplanationEngine
+
+    mock_engine = ExplanationEngine(api_key="gsk_dummy_test_key", provider="groq", model="openai/gpt-oss-20b")
+    
+    resp = client.get("/api/matches/1359487/replay")
+    match_data = resp.json()
+    metadata = MatchMetadata(**match_data["metadata"])
+    deliveries = [DeliveryEvent(**d) for d in match_data["deliveries"]]
+    tp = TurningPoint(**match_data["turning_points"][0])
+
+    calls = []
+
+    class MockSuccessResponse:
+        status_code = 200
+        text = json.dumps({
+            "choices": [{
+                "message": {
+                    "content": json.dumps({
+                        "headline": "Clean Finish",
+                        "explanation": "Normal explanation.",
+                        "takeaway": "Key phase.",
+                        "confidence_notes": "Verified.",
+                        "supporting_delivery_ids": [117, 118]
+                    })
+                }
+            }]
+        })
+        def json(self):
+            return json.loads(self.text)
+
+    async def mock_post(url, headers=None, json=None, **kwargs):
+        calls.append({"url": url, "headers": headers, "json": json})
+        return MockSuccessResponse()
+
+    with patch("httpx.AsyncClient.post", side_effect=mock_post):
+        result = asyncio.run(mock_engine.explain_live_strict(tp, deliveries, metadata))
+        assert len(calls) == 1
+        payload = calls[0]["json"]
+        assert payload["max_completion_tokens"] >= 1500, "Must allocate at least 1500 completion tokens for reasoning models"
+        assert payload["max_tokens"] >= 1500
+        assert payload["model"] == "openai/gpt-oss-20b"
+        assert result.source == "live_llm"
