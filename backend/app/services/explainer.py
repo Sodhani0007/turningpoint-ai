@@ -38,21 +38,25 @@ class ExplanationEngine:
         self.base_url = base_url or ""
         self.model = model or ""
 
+        groq_env = os.environ.get("GROQ_API_KEY") or settings.GROQ_API_KEY
+        gemini_env = os.environ.get("GEMINI_API_KEY") or settings.GEMINI_API_KEY
+        openai_env = os.environ.get("OPENAI_API_KEY") or settings.OPENAI_API_KEY
+
         if not self.api_key:
-            if settings.GROQ_API_KEY:
+            if groq_env:
                 self.provider = "groq"
-                self.api_key = settings.GROQ_API_KEY
-                self.base_url = settings.GROQ_BASE_URL
+                self.api_key = groq_env
+                self.base_url = os.environ.get("GROQ_BASE_URL") or settings.GROQ_BASE_URL
                 self.model = "llama-3.3-70b-versatile"
-            elif settings.GEMINI_API_KEY:
+            elif gemini_env:
                 self.provider = "gemini"
-                self.api_key = settings.GEMINI_API_KEY
-                self.base_url = settings.GEMINI_BASE_URL
+                self.api_key = gemini_env
+                self.base_url = os.environ.get("GEMINI_BASE_URL") or settings.GEMINI_BASE_URL
                 self.model = "gemini-2.0-flash"
-            elif settings.OPENAI_API_KEY:
+            elif openai_env:
                 self.provider = "openai"
-                self.api_key = settings.OPENAI_API_KEY
-                self.base_url = settings.OPENAI_BASE_URL
+                self.api_key = openai_env
+                self.base_url = os.environ.get("OPENAI_BASE_URL") or settings.OPENAI_BASE_URL
                 self.model = "gpt-4o-mini"
         else:
             self.provider = provider or "custom"
@@ -163,6 +167,88 @@ class ExplanationEngine:
             "deliveries": evidence_events
         }
 
+    async def explain_live_strict(
+        self,
+        tp: TurningPoint,
+        deliveries: List[DeliveryEvent],
+        metadata: MatchMetadata,
+        custom_prompt: Optional[str] = None
+    ) -> ExplainResponse:
+        """
+        Execute strict live LLM inference against the configured provider.
+        Bypasses all precomputed caches and deterministic fallbacks.
+        Raises on any network, authentication, schema, or rate-limit error.
+        """
+        if not self.api_key or self.provider == "none":
+            raise RuntimeError(
+                "Cannot execute live LLM inference: No GROQ_API_KEY configured in backend environment."
+            )
+
+        if not self._check_rate_limit():
+            raise RuntimeError("Rate limit exceeded for live LLM requests.")
+
+        evidence = self.build_evidence_payload(tp, deliveries, metadata)
+        start_time = time.time()
+        user_content = (
+            f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
+            f"Task: Provide a factual explanation for why the model-estimated win probability changed "
+            f"by {tp.shift_percentage}% between {tp.over_label}. Rely strictly on the deliveries provided above."
+        )
+        if custom_prompt:
+            user_content += f"\nUser Question: {custom_prompt}"
+
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json"
+        }
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": user_content}
+            ],
+            "response_format": {"type": "json_object"},
+            "temperature": 0.2,
+            "max_tokens": 500
+        }
+
+        endpoint = f"{self.base_url.rstrip('/')}/chat/completions"
+        async with httpx.AsyncClient(timeout=12.0) as client:
+            resp = await client.post(endpoint, headers=headers, json=payload)
+            latency_ms = int((time.time() - start_time) * 1000)
+
+            if resp.status_code != 200:
+                raise RuntimeError(
+                    f"Live LLM provider returned HTTP {resp.status_code}: {resp.text}"
+                )
+
+            content = resp.json()["choices"][0]["message"]["content"]
+            parsed = json.loads(content)
+
+            # Strictly sanitize supporting delivery IDs within the valid range
+            valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
+            raw_ids = parsed.get("supporting_delivery_ids", [])
+            sanitized_ids = [i for i in raw_ids if i in valid_ids]
+            if not sanitized_ids:
+                sanitized_ids = tp.supporting_delivery_ids
+
+            return ExplainResponse(
+                turning_point_id=tp.id,
+                match_id=metadata.match_id,
+                headline=parsed.get("headline", f"Momentum Swing in {tp.over_label}"),
+                explanation=parsed.get("explanation", tp.summary),
+                takeaway=parsed.get("takeaway", "Decisive phase in the chase."),
+                confidence_notes=parsed.get("confidence_notes", "Grounded in observed delivery events."),
+                supporting_delivery_ids=sanitized_ids,
+                verified_evidence=evidence,
+                source="live_llm",
+                llm_metadata={
+                    "provider": self.provider,
+                    "model": self.model,
+                    "latency_ms": latency_ms
+                }
+            )
+
     async def explain(
         self,
         tp: TurningPoint,
@@ -170,7 +256,6 @@ class ExplanationEngine:
         metadata: MatchMetadata,
         custom_prompt: Optional[str] = None
     ) -> ExplainResponse:
-        evidence = self.build_evidence_payload(tp, deliveries, metadata)
         cache_key = f"{metadata.match_id}_{tp.id}_{custom_prompt or 'default'}"
 
         # 1. Check runtime live cache first
@@ -178,71 +263,16 @@ class ExplanationEngine:
             cached = self._live_cache[cache_key]
             return ExplainResponse(**cached)
 
-        # 2. If API Key is present and rate-limit permits, attempt live LLM request
-        if self.api_key and self._check_rate_limit():
+        # 2. If API Key is present, attempt live LLM request via explain_live_strict
+        if self.api_key and self.provider != "none":
             try:
-                start_time = time.time()
-                user_content = (
-                    f"Match Evidence:\n{json.dumps(evidence, indent=2)}\n\n"
-                    f"Task: Provide a factual explanation for why the model-estimated win probability changed "
-                    f"by {tp.shift_percentage}% between {tp.over_label}. Rely strictly on the deliveries provided above."
-                )
-                if custom_prompt:
-                    user_content += f"\nUser Question: {custom_prompt}"
-
-                headers = {
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                }
-                payload = {
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": SYSTEM_PROMPT},
-                        {"role": "user", "content": user_content}
-                    ],
-                    "response_format": {"type": "json_object"},
-                    "temperature": 0.2,
-                    "max_tokens": 500
-                }
-
-                endpoint = f"{self.base_url.rstrip('/')}/chat/completions"
-                async with httpx.AsyncClient(timeout=8.0) as client:
-                    resp = await client.post(endpoint, headers=headers, json=payload)
-                    latency_ms = int((time.time() - start_time) * 1000)
-
-                    if resp.status_code == 200:
-                        content = resp.json()["choices"][0]["message"]["content"]
-                        parsed = json.loads(content)
-
-                        # Strictly sanitize supporting delivery IDs within the valid range
-                        valid_ids = [d.delivery_idx for d in deliveries if tp.start_delivery_idx <= d.delivery_idx <= tp.end_delivery_idx]
-                        raw_ids = parsed.get("supporting_delivery_ids", [])
-                        sanitized_ids = [i for i in raw_ids if i in valid_ids]
-                        if not sanitized_ids:
-                            sanitized_ids = tp.supporting_delivery_ids
-
-                        result = ExplainResponse(
-                            turning_point_id=tp.id,
-                            match_id=metadata.match_id,
-                            headline=parsed.get("headline", f"Momentum Swing in {tp.over_label}"),
-                            explanation=parsed.get("explanation", tp.summary),
-                            takeaway=parsed.get("takeaway", "Decisive phase in the chase."),
-                            confidence_notes=parsed.get("confidence_notes", "Grounded in observed delivery events."),
-                            supporting_delivery_ids=sanitized_ids,
-                            verified_evidence=evidence,
-                            source="live_llm",
-                            llm_metadata={
-                                "provider": self.provider,
-                                "model": self.model,
-                                "latency_ms": latency_ms
-                            }
-                        )
-                        self._live_cache[cache_key] = result.model_dump()
-                        return result
-                    else:
-                        logger.warning(f"Live LLM call returned {resp.status_code}: {resp.text}")
+                result = await self.explain_live_strict(tp, deliveries, metadata, custom_prompt)
+                self._live_cache[cache_key] = result.model_dump()
+                return result
             except Exception as e:
                 logger.warning(f"Live LLM call failed ({e}). Falling back to precomputed / deterministic.")
+
+        evidence = self.build_evidence_payload(tp, deliveries, metadata)
 
         # 3. Check precomputed cache
         file_cache_key = f"{metadata.match_id}_{tp.id}"
