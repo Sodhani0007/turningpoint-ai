@@ -1928,9 +1928,9 @@
     "turning_point_id": "tp_1359487_1",
     "match_id": "1359487",
     "headline": "Rinku Singh's 5 Consecutive Sixes Seal Historic Chase (+99.9%)",
-    "explanation": "Entering the final over, Kolkata Knight Riders required 29 runs with the model estimating a 0.1% win probability. After Umesh Yadav rotated strike with a single, Rinku Singh scored 30 runs off the final five deliveries against Yash Dayal (6, 6, 6, 6, 6). The required run rate dropped from 33.6 to zero as KKR successfully reached 207/7 on the final ball.",
-    "takeaway": "An extraordinary 30-run sequence off five legal deliveries converted an equation of 28 needed off 5 balls into a 3-wicket victory.",
-    "confidence_notes": "Grounded strictly in verified second-innings scorecard events and ball-by-ball tracking.",
+    "explanation": "Entering the final over, Kolkata Knight Riders were 176/7 needing 29 runs off 6 balls (0.1% win probability). On 19.1, Umesh Yadav rotated strike with a single to reach 177/7, leaving 28 required off 5 balls. Rinku Singh then smashed 30 runs off the final 5 deliveries (6, 6, 6, 6, 6) against Yash Dayal to reach 207/7 and clinch a 3-wicket victory.",
+    "takeaway": "An extraordinary 30-run sequence off five legal deliveries converted an equation of 28 needed off 5 balls into a historic 3-wicket victory.",
+    "confidence_notes": "Grounded strictly in verified second-innings scorecard events: 176/7 (end of 19th over) -> single on 19.1 -> 5 consecutive sixes (19.2 to 19.6).",
     "supporting_delivery_ids": [
       118,
       119,

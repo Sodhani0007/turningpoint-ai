@@ -9,5 +9,9 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
       - key: GROQ_API_KEY
         sync: false
+      - key: ALLOWED_ORIGINS
+        value: "https://frontend-mauve-omega-75.vercel.app,http://localhost:5173,http://localhost:4173"
