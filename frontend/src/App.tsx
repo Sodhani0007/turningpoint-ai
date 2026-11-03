@@ -9,6 +9,7 @@ import { ReplayControls } from './components/ReplayControls';
 import { TurningPointCards } from './components/TurningPointCards';
 import { ExplanationModal } from './components/ExplanationModal';
 import { ModelMetricsModal } from './components/ModelMetricsModal';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { HelpCircle, AlertTriangle } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -316,18 +317,26 @@ export const App: React.FC = () => {
       </footer>
 
       {/* Explanation Modal */}
-      <ExplanationModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        turningPoint={selectedTurningPoint}
-        explanation={explanation}
-        isLoading={isExplaining}
-        onAskCustomPrompt={(prompt) => {
-          if (selectedTurningPoint) {
-            handleExplainTurningPoint(selectedTurningPoint, prompt);
-          }
+      <ErrorBoundary
+        fallbackTitle="Explanation Modal Error"
+        onReset={() => {
+          setIsModalOpen(false);
+          setExplanation(null);
         }}
-      />
+      >
+        <ExplanationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          turningPoint={selectedTurningPoint}
+          explanation={explanation}
+          isLoading={isExplaining}
+          onAskCustomPrompt={(prompt) => {
+            if (selectedTurningPoint) {
+              handleExplainTurningPoint(selectedTurningPoint, prompt);
+            }
+          }}
+        />
+      </ErrorBoundary>
 
       {/* Model Performance Modal */}
       <ModelMetricsModal

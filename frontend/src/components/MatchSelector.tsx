@@ -72,7 +72,7 @@ export const MatchSelector: React.FC<MatchSelectorProps> = ({
                   Target: {m.target}
                 </span>
                 <span className="text-slate-400 text-[10px] truncate max-w-[130px]" title={m.venue}>
-                  {m.venue.split(',')[0]}
+                  {m.venue ? m.venue.split(',')[0] : 'IPL Venue'}
                 </span>
               </div>
             </button>

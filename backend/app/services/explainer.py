@@ -206,8 +206,14 @@ class ExplanationEngine:
                 "batter": d.batter,
                 "bowler": d.bowler,
                 "runs": d.total_runs,
-                "wickets": [w.player_out for w in d.wickets if w.is_wicket],
-                "event": d.event_description
+                "runs_total": d.total_runs,
+                "batter_runs": d.batter_runs,
+                "extra_runs": d.extra_runs,
+                "is_boundary": d.is_boundary,
+                "is_dot": d.is_dot,
+                "wickets": [{"player": w.player_out, "kind": w.kind} for w in d.wickets if w.is_wicket],
+                "event": d.event_description,
+                "event_description": d.event_description
             })
 
         return {

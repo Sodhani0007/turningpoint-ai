@@ -21,6 +21,112 @@ export interface ReplayData {
   turning_points: TurningPoint[];
 }
 
+export function normalizeExplainResponse(data: any): ExplainResponse {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid explanation response: payload is null or not an object');
+  }
+
+  const rawEvidence = data.verified_evidence || {};
+  const rawDeliveries = Array.isArray(rawEvidence.deliveries) ? rawEvidence.deliveries : [];
+
+  const normalizedDeliveries = rawDeliveries.map((del: any) => {
+    const runsTotal = typeof del.runs_total === 'number'
+      ? del.runs_total
+      : typeof del.runs === 'number'
+        ? del.runs
+        : 0;
+
+    const batterRuns = typeof del.batter_runs === 'number'
+      ? del.batter_runs
+      : typeof del.runs === 'number'
+        ? del.runs
+        : runsTotal;
+
+    const extraRuns = typeof del.extra_runs === 'number'
+      ? del.extra_runs
+      : Math.max(0, runsTotal - batterRuns);
+
+    // Normalize wickets array safely handling string arrays or object arrays
+    let normalizedWickets: Array<{ player: string; kind: string }> = [];
+    if (Array.isArray(del.wickets)) {
+      normalizedWickets = del.wickets.map((w: any) => {
+        if (typeof w === 'string') {
+          return { player: w, kind: 'wicket' };
+        }
+        if (w && typeof w === 'object') {
+          return {
+            player: String(w.player || w.player_out || 'Batter'),
+            kind: String(w.kind || 'wicket'),
+          };
+        }
+        return { player: 'Batter', kind: 'wicket' };
+      });
+    }
+
+    // Normalized event description
+    let eventDesc = '';
+    if (typeof del.event_description === 'string' && del.event_description.trim()) {
+      eventDesc = del.event_description.trim();
+    } else if (typeof del.event === 'string' && del.event.trim()) {
+      eventDesc = del.event.trim();
+    } else {
+      const bowler = del.bowler || 'Bowler';
+      const batter = del.batter || 'Batter';
+      eventDesc = `${bowler} to ${batter}, ${runsTotal} run${runsTotal === 1 ? '' : 's'}`;
+    }
+
+    return {
+      delivery_id: Number(del.delivery_id ?? 0),
+      over: String(del.over ?? ''),
+      batter: String(del.batter ?? 'Batter'),
+      bowler: String(del.bowler ?? 'Bowler'),
+      runs_total: runsTotal,
+      batter_runs: batterRuns,
+      extra_runs: extraRuns,
+      is_boundary: Boolean(del.is_boundary ?? (batterRuns === 4 || batterRuns === 6)),
+      is_dot: Boolean(del.is_dot ?? (runsTotal === 0 && normalizedWickets.length === 0)),
+      wickets: normalizedWickets,
+      event_description: eventDesc,
+    };
+  });
+
+  return {
+    turning_point_id: String(data.turning_point_id || ''),
+    match_id: String(data.match_id || ''),
+    headline: String(data.headline || 'Momentum Shift Analysis'),
+    explanation: String(data.explanation || 'Momentum shifted significantly during this phase of the chase.'),
+    takeaway: String(data.takeaway || 'Crucial sequence impacting win probability.'),
+    confidence_notes: data.confidence_notes ? String(data.confidence_notes) : undefined,
+    supporting_delivery_ids: Array.isArray(data.supporting_delivery_ids) ? data.supporting_delivery_ids : [],
+    verified_evidence: {
+      match_id: String(rawEvidence.match_id || data.match_id || ''),
+      match_context: String(rawEvidence.match_context || ''),
+      venue: String(rawEvidence.venue || ''),
+      date: String(rawEvidence.date || ''),
+      over_range: String(rawEvidence.over_range || ''),
+      score_before: String(rawEvidence.score_before || ''),
+      score_after: String(rawEvidence.score_after || ''),
+      target: Number(rawEvidence.target ?? 0),
+      runs_needed_before: Number(rawEvidence.runs_needed_before ?? 0),
+      runs_needed_after: Number(rawEvidence.runs_needed_after ?? 0),
+      balls_remaining_before: Number(rawEvidence.balls_remaining_before ?? 0),
+      balls_remaining_after: Number(rawEvidence.balls_remaining_after ?? 0),
+      required_run_rate_before: Number(rawEvidence.required_run_rate_before ?? 0),
+      required_run_rate_after: Number(rawEvidence.required_run_rate_after ?? 0),
+      model_win_prob_before: String(rawEvidence.model_win_prob_before || '0%'),
+      model_win_prob_after: String(rawEvidence.model_win_prob_after || '0%'),
+      win_prob_shift: String(rawEvidence.win_prob_shift || '0%'),
+      runs_in_window: Number(rawEvidence.runs_in_window ?? 0),
+      wickets_in_window: Number(rawEvidence.wickets_in_window ?? 0),
+      batters_involved: Array.isArray(rawEvidence.batters_involved) ? rawEvidence.batters_involved : [],
+      bowler_involved: rawEvidence.bowler_involved ? String(rawEvidence.bowler_involved) : null,
+      deliveries: normalizedDeliveries,
+    },
+    source: data.source || 'deterministic_fallback',
+    llm_metadata: data.llm_metadata,
+  };
+}
+
 export class CricketApiService {
   private backendStatus: BackendStatus = {
     connected: false,
@@ -141,7 +247,8 @@ export class CricketApiService {
         });
         const contentType = res.headers.get('content-type') || '';
         if (res.ok && contentType.includes('application/json')) {
-          return await res.json();
+          const raw = await res.json();
+          return normalizeExplainResponse(raw);
         }
       } catch (err) {
         console.warn('Backend /explain call failed, falling back to precomputed explanation:', err);
@@ -150,13 +257,13 @@ export class CricketApiService {
 
     // Fallback to verified precomputed explanations
     const cacheKey = `${matchId}_${turningPointId}`;
-    const explanations = precomputedBundle.explanations as Record<string, ExplainResponse>;
+    const explanations = precomputedBundle.explanations as Record<string, any>;
     if (explanations[cacheKey]) {
       const exp = explanations[cacheKey];
-      return {
+      return normalizeExplainResponse({
         ...exp,
-        source: (exp.source as any) || 'precomputed_llm',
-      };
+        source: exp.source || 'precomputed_llm',
+      });
     }
 
     throw new Error(`Explanation for ${turningPointId} not found.`);

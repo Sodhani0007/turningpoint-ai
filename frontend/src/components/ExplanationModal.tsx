@@ -177,33 +177,49 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-800/60 font-mono-numbers">
-                        {explanation.verified_evidence.deliveries.map((del) => (
-                          <tr key={del.delivery_id} className="hover:bg-slate-800/40">
-                            <td className="py-2 px-3 font-semibold text-slate-300">
-                              {del.over}
-                            </td>
-                            <td className="py-2 px-3 font-sans text-slate-300">
-                              <span className="text-slate-400">{del.bowler}</span> →{' '}
-                              <strong className="text-slate-200">{del.batter}</strong>
-                            </td>
-                            <td className="py-2 px-3 font-sans">
-                              {del.wickets.length > 0 ? (
-                                <span className="text-rose-400 font-semibold">
-                                  WICKET ({del.wickets[0].kind})
-                                </span>
-                              ) : del.batter_runs === 6 ? (
-                                <span className="text-purple-400 font-bold">SIX</span>
-                              ) : del.batter_runs === 4 ? (
-                                <span className="text-emerald-400 font-bold">FOUR</span>
-                              ) : (
-                                <span className="text-slate-400">{del.event_description.split(', ')[1] || 'Run'}</span>
-                              )}
-                            </td>
-                            <td className="py-2 px-3 text-right font-bold text-slate-200">
-                              +{del.runs_total}
-                            </td>
-                          </tr>
-                        ))}
+                        {explanation.verified_evidence.deliveries.map((del) => {
+                          const hasWicket = Boolean(del.wickets && del.wickets.length > 0);
+                          const wicketKind = hasWicket ? (del.wickets[0]?.kind || 'wicket') : null;
+                          const runs = del.runs_total ?? del.batter_runs ?? 0;
+                          const isSix = del.batter_runs === 6 || runs === 6;
+                          const isFour = del.batter_runs === 4 || runs === 4;
+
+                          let eventLabel = 'Run';
+                          if (typeof del.event_description === 'string' && del.event_description.trim()) {
+                            const parts = del.event_description.split(', ');
+                            eventLabel = parts.length > 1 ? parts[1] : del.event_description;
+                          } else {
+                            eventLabel = `${runs} run${runs === 1 ? '' : 's'}`;
+                          }
+
+                          return (
+                            <tr key={del.delivery_id} className="hover:bg-slate-800/40">
+                              <td className="py-2 px-3 font-semibold text-slate-300">
+                                {del.over}
+                              </td>
+                              <td className="py-2 px-3 font-sans text-slate-300">
+                                <span className="text-slate-400">{del.bowler}</span> →{' '}
+                                <strong className="text-slate-200">{del.batter}</strong>
+                              </td>
+                              <td className="py-2 px-3 font-sans">
+                                {hasWicket ? (
+                                  <span className="text-rose-400 font-semibold">
+                                    WICKET ({wicketKind})
+                                  </span>
+                                ) : isSix ? (
+                                  <span className="text-purple-400 font-bold">SIX</span>
+                                ) : isFour ? (
+                                  <span className="text-emerald-400 font-bold">FOUR</span>
+                                ) : (
+                                  <span className="text-slate-400">{eventLabel}</span>
+                                )}
+                              </td>
+                              <td className="py-2 px-3 text-right font-bold text-slate-200">
+                                +{runs}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
