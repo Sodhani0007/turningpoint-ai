@@ -3,6 +3,9 @@
 > **"Understand the moments that change the game."**  
 > An AI-powered cricket companion that models and explains match momentum shifts using real historical IPL delivery data, a trained win-probability model, and evidence-grounded AI explanations.
 
+**Live Production URL:** [https://frontend-mauve-omega-75.vercel.app](https://frontend-mauve-omega-75.vercel.app)  
+**GitHub Repository:** [https://github.com/Sodhani0007/turningpoint-ai](https://github.com/Sodhani0007/turningpoint-ai)
+
 ---
 
 ## 1. Problem Statement & User Persona
