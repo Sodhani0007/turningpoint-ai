@@ -15,6 +15,9 @@
 ## 1. Live Demo and Repository Links
 
 - **Production Frontend:** [https://frontend-mauve-omega-75.vercel.app](https://frontend-mauve-omega-75.vercel.app)
+- - **Updated UI (Dream11-Inspired) — Live Preview:** [View Redesigned Dashboard](https://frontend-g89la99cu-sodhani0007.vercel.app)
+  - **Updated UI Source Code:** [View Feature Branch](https://github.com/Sodhani0007/turningpoint-ai/tree/feature/dream11-inspired-ui)
+  - *Post-submission visual refinement; the original submitted application remains available above.*
 - **Production Backend:** [https://turningpoint-ai-backend.onrender.com](https://turningpoint-ai-backend.onrender.com)
 - **Interactive API Documentation:** [https://turningpoint-ai-backend.onrender.com/docs](https://turningpoint-ai-backend.onrender.com/docs)
 - **GitHub Repository:** [https://github.com/Sodhani0007/turningpoint-ai](https://github.com/Sodhani0007/turningpoint-ai)
