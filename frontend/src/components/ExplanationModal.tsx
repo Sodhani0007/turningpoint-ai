@@ -53,19 +53,19 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200"
       onClick={onClose}
       data-testid="explanation-modal-backdrop"
     >
       <div
-        className="bg-white border border-[#E5E7EB] rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden"
+        className="bg-white border border-[#E5E7EB] rounded-2xl max-w-2xl w-full max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl relative overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         data-testid="explanation-modal-card"
       >
         {/* Modal Header */}
-        <div className="p-4 sm:p-5 border-b border-[#EAECF0] flex items-start justify-between gap-3 bg-[#F9FAFB]">
+        <div className="p-4 sm:p-5 border-b border-[#EAECF0] flex items-start justify-between gap-3 bg-[#F9FAFB] shrink-0">
           <div className="flex items-start gap-3">
-            <div className="p-2.5 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20] mt-0.5 shadow-xs shrink-0">
+            <div className="p-2 sm:p-2.5 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] text-[#D92D20] mt-0.5 shadow-xs shrink-0">
               <Sparkles className="w-5 h-5 text-[#E31E24]" />
             </div>
             <div>
@@ -108,7 +108,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                   </span>
                 )}
               </div>
-              <h2 className="text-base sm:text-lg font-bold text-[#17191F]" data-testid="explanation-headline">
+              <h2 className="text-base sm:text-lg font-bold text-[#17191F] leading-snug" data-testid="explanation-headline">
                 {explanation?.headline || turningPoint.over_label}
               </h2>
             </div>
@@ -117,7 +117,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
           <button
             onClick={onClose}
             data-testid="close-explanation-modal-btn"
-            className="p-1.5 rounded-lg text-[#667085] hover:text-[#17191F] hover:bg-[#F2F4F7] transition-colors cursor-pointer"
+            className="p-1.5 rounded-lg text-[#667085] hover:text-[#17191F] hover:bg-[#F2F4F7] transition-colors cursor-pointer shrink-0"
             title="Close (Esc)"
           >
             <X className="w-5 h-5" />
@@ -125,7 +125,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-sm text-[#344054]">
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 text-sm text-[#344054] flex-1">
           {/* Query Error Alert if custom prompt failed */}
           {errorMessage && (
             <div className="p-3.5 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-xs flex items-start gap-2.5 shadow-xs" data-testid="qa-error-alert">
@@ -154,7 +154,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                       <HelpCircle className="w-3.5 h-3.5" />
                       User Question
                     </div>
-                    <p className="text-sm font-bold text-[#17191F] bg-white p-3 rounded-lg border border-[#EAECF0] shadow-2xs" data-testid="user-question-text">
+                    <p className="text-sm font-bold text-[#17191F] bg-white p-3 rounded-lg border border-[#EAECF0] shadow-2xs leading-snug" data-testid="user-question-text">
                       "{explanation.user_question}"
                     </p>
                   </div>
@@ -186,7 +186,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                 <div className="text-[11px] font-bold uppercase tracking-wider text-[#175CD3] mb-1">
                   Key Takeaway
                 </div>
-                <p className="text-xs sm:text-sm text-[#1849A9] font-medium" data-testid="explanation-takeaway">
+                <p className="text-xs sm:text-sm text-[#1849A9] font-medium leading-relaxed" data-testid="explanation-takeaway">
                   {explanation.takeaway}
                 </p>
               </div>
@@ -205,65 +205,67 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
                   </div>
 
                   <div className="border border-[#EAECF0] rounded-xl overflow-hidden shadow-xs">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-[#F9FAFB] text-[#475467] font-bold border-b border-[#EAECF0]">
-                        <tr>
-                          <th className="py-2.5 px-3">Over</th>
-                          <th className="py-2.5 px-3">Matchup</th>
-                          <th className="py-2.5 px-3">Event</th>
-                          <th className="py-2.5 px-3 text-right">Runs</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#EAECF0] font-mono-numbers">
-                        {explanation.verified_evidence.deliveries.map((del) => {
-                          const hasWicket = Boolean(del.wickets && del.wickets.length > 0);
-                          const wicketKind = hasWicket ? (del.wickets[0]?.kind || 'wicket') : null;
-                          const runs = del.runs_total ?? del.batter_runs ?? 0;
-                          const isSix = del.batter_runs === 6 || runs === 6;
-                          const isFour = del.batter_runs === 4 || runs === 4;
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs min-w-[420px]">
+                        <thead className="bg-[#F9FAFB] text-[#475467] font-bold border-b border-[#EAECF0]">
+                          <tr>
+                            <th className="py-2.5 px-3">Over</th>
+                            <th className="py-2.5 px-3">Matchup</th>
+                            <th className="py-2.5 px-3">Event</th>
+                            <th className="py-2.5 px-3 text-right">Runs</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-[#EAECF0] font-mono-numbers">
+                          {explanation.verified_evidence.deliveries.map((del) => {
+                            const hasWicket = Boolean(del.wickets && del.wickets.length > 0);
+                            const wicketKind = hasWicket ? (del.wickets[0]?.kind || 'wicket') : null;
+                            const runs = del.runs_total ?? del.batter_runs ?? 0;
+                            const isSix = del.batter_runs === 6 || runs === 6;
+                            const isFour = del.batter_runs === 4 || runs === 4;
 
-                          let eventLabel = 'Run';
-                          if (typeof del.event_description === 'string' && del.event_description.trim()) {
-                            const parts = del.event_description.split(', ');
-                            eventLabel = parts.length > 1 ? parts[1] : del.event_description;
-                          } else {
-                            eventLabel = `${runs} run${runs === 1 ? '' : 's'}`;
-                          }
+                            let eventLabel = 'Run';
+                            if (typeof del.event_description === 'string' && del.event_description.trim()) {
+                              const parts = del.event_description.split(', ');
+                              eventLabel = parts.length > 1 ? parts[1] : del.event_description;
+                            } else {
+                              eventLabel = `${runs} run${runs === 1 ? '' : 's'}`;
+                            }
 
-                          return (
-                            <tr key={del.delivery_id} className="hover:bg-[#F9FAFB] transition-colors">
-                              <td className="py-2.5 px-3 font-bold text-[#17191F]">
-                                {del.over}
-                              </td>
-                              <td className="py-2.5 px-3 font-sans text-[#344054]">
-                                <span className="text-[#667085]">{del.bowler}</span> →{' '}
-                                <strong className="text-[#17191F] font-bold">{del.batter}</strong>
-                              </td>
-                              <td className="py-2.5 px-3 font-sans">
-                                {hasWicket ? (
-                                  <span className="text-[#B42318] bg-[#FEF3F2] font-bold px-2 py-0.5 rounded border border-[#FECDCA]">
-                                    WICKET ({wicketKind})
-                                  </span>
-                                ) : isSix ? (
-                                  <span className="text-[#6941C6] bg-[#F9F5FF] font-black px-2 py-0.5 rounded border border-[#E9D7FE]">
-                                    SIX
-                                  </span>
-                                ) : isFour ? (
-                                  <span className="text-[#027A48] bg-[#ECFDF3] font-black px-2 py-0.5 rounded border border-[#A6F4C5]">
-                                    FOUR
-                                  </span>
-                                ) : (
-                                  <span className="text-[#667085] font-medium">{eventLabel}</span>
-                                )}
-                              </td>
-                              <td className="py-2.5 px-3 text-right font-black text-[#17191F]">
-                                +{runs}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
+                            return (
+                              <tr key={del.delivery_id} className="hover:bg-[#F9FAFB] transition-colors">
+                                <td className="py-2.5 px-3 font-bold text-[#17191F]">
+                                  {del.over}
+                                </td>
+                                <td className="py-2.5 px-3 font-sans text-[#344054]">
+                                  <span className="text-[#667085]">{del.bowler}</span> →{' '}
+                                  <strong className="text-[#17191F] font-bold">{del.batter}</strong>
+                                </td>
+                                <td className="py-2.5 px-3 font-sans">
+                                  {hasWicket ? (
+                                    <span className="text-[#B42318] bg-[#FEF3F2] font-bold px-2 py-0.5 rounded border border-[#FECDCA]">
+                                      WICKET ({wicketKind})
+                                    </span>
+                                  ) : isSix ? (
+                                    <span className="text-[#6941C6] bg-[#F9F5FF] font-black px-2 py-0.5 rounded border border-[#E9D7FE]">
+                                      SIX
+                                    </span>
+                                  ) : isFour ? (
+                                    <span className="text-[#027A48] bg-[#ECFDF3] font-black px-2 py-0.5 rounded border border-[#A6F4C5]">
+                                      FOUR
+                                    </span>
+                                  ) : (
+                                    <span className="text-[#667085] font-medium">{eventLabel}</span>
+                                  )}
+                                </td>
+                                <td className="py-2.5 px-3 text-right font-black text-[#17191F]">
+                                  +{runs}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               )}
@@ -279,7 +281,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
         </div>
 
         {/* Custom Follow-Up Question Input */}
-        <form onSubmit={handleSubmitQuestion} className="p-3 sm:p-4 border-t border-[#EAECF0] bg-[#F9FAFB] flex gap-2">
+        <form onSubmit={handleSubmitQuestion} className="p-3 sm:p-4 border-t border-[#EAECF0] bg-[#F9FAFB] flex gap-2 shrink-0">
           <input
             type="text"
             placeholder="Ask AI about this moment (e.g. 'Why did the required rate spike?')..."
@@ -293,7 +295,7 @@ export const ExplanationModal: React.FC<ExplanationModalProps> = ({
             type="submit"
             disabled={!customQuestion.trim() || isLoading}
             data-testid="submit-custom-prompt-btn"
-            className="px-4 py-2.5 rounded-xl bg-[#E31E24] hover:bg-[#C9161B] text-white text-xs font-bold flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm shadow-[#E31E24]/20"
+            className="px-4 py-2.5 rounded-xl bg-[#E31E24] hover:bg-[#C9161B] text-white text-xs font-bold flex items-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm shadow-[#E31E24]/20 shrink-0"
           >
             <Send className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Ask AI</span>

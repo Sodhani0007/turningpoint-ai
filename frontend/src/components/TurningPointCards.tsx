@@ -32,7 +32,7 @@ export const TurningPointCards: React.FC<TurningPointCardsProps> = ({
         </span>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
         {turningPoints.map((tp, rankIdx) => {
           const isSelected = tp.id === selectedTurningPointId;
           const isPositive = tp.shift_percentage > 0;
@@ -43,7 +43,7 @@ export const TurningPointCards: React.FC<TurningPointCardsProps> = ({
             <div
               key={tp.id}
               onClick={() => onSelectTurningPoint(tp)}
-              className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between cursor-pointer relative overflow-hidden group shadow-xs ${
+              className={`p-4 rounded-xl border transition-all duration-200 flex flex-col justify-between h-full cursor-pointer relative overflow-hidden group shadow-xs ${
                 isSelected
                   ? 'bg-white border-2 border-[#E31E24] shadow-md ring-2 ring-[#E31E24]/10'
                   : 'bg-[#F9FAFB] hover:bg-white border-[#EAECF0] hover:border-[#D0D5DD] hover:shadow-sm'
@@ -53,8 +53,8 @@ export const TurningPointCards: React.FC<TurningPointCardsProps> = ({
                 <div className="absolute top-0 left-0 right-0 h-1 bg-[#E31E24] pointer-events-none" />
               )}
 
-              {/* Card Rank Header */}
-              <div>
+              {/* Card Content Top */}
+              <div className="flex-1 flex flex-col">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[10px] uppercase font-bold tracking-wider text-[#667085]">
                     Rank #{rankIdx + 1}
@@ -92,20 +92,20 @@ export const TurningPointCards: React.FC<TurningPointCardsProps> = ({
                 </div>
 
                 {/* Summary */}
-                <p className="text-xs text-[#344054] line-clamp-3 mb-3 leading-relaxed">
+                <p className="text-xs text-[#344054] min-h-[3.6rem] line-clamp-3 mb-3 leading-relaxed">
                   {tp.summary}
                 </p>
               </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2.5 border-t border-[#EAECF0] flex items-center justify-between gap-1.5">
+              {/* Action Buttons Footer */}
+              <div className="pt-2.5 border-t border-[#EAECF0] flex items-center justify-between gap-1.5 mt-auto">
                 <button
                   type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onSelectTurningPoint(tp);
                   }}
-                  className="flex items-center gap-1 text-[11px] text-[#667085] hover:text-[#17191F] transition-colors cursor-pointer font-medium"
+                  className="flex items-center gap-1 px-2 py-1 text-[11px] text-[#667085] hover:text-[#17191F] transition-colors cursor-pointer font-medium min-h-[28px]"
                 >
                   <Navigation className="w-3 h-3" />
                   <span>Jump</span>
@@ -117,7 +117,7 @@ export const TurningPointCards: React.FC<TurningPointCardsProps> = ({
                     e.stopPropagation();
                     onExplainTurningPoint(tp);
                   }}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#FEF3F2] hover:bg-[#FEE4E2] border border-[#FECDCA] text-[#D92D20] text-[11px] font-bold transition-all cursor-pointer shadow-2xs"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#FEF3F2] hover:bg-[#FEE4E2] border border-[#FECDCA] text-[#D92D20] text-[11px] font-bold transition-all cursor-pointer shadow-2xs min-h-[28px]"
                 >
                   <Sparkles className="w-3 h-3 text-[#E31E24]" />
                   <span>Explain</span>

@@ -197,8 +197,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         </div>
 
         {/* Recent Deliveries Ticker */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase font-bold text-[#667085] mr-1">Recent:</span>
+        <div className="flex items-center gap-1.5 overflow-x-auto py-0.5 shrink-0 max-w-full">
+          <span className="text-[10px] uppercase font-bold text-[#667085] mr-1 shrink-0">Recent:</span>
           {recentDeliveries.map((d) => {
             let badgeStyle = 'bg-white text-[#344054] border-[#D0D5DD] hover:border-[#98A2B3]';
             let label = d.total_runs.toString();

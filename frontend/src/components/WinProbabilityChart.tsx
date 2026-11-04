@@ -10,7 +10,7 @@ import {
   ReferenceDot,
 } from 'recharts';
 import { DeliveryEvent, TurningPoint } from '../types/cricket';
-import { Eye, EyeOff, Zap, Flame } from 'lucide-react';
+import { Eye, EyeOff, Zap, Flame, Clock } from 'lucide-react';
 
 interface WinProbabilityChartProps {
   deliveries: DeliveryEvent[];
@@ -49,6 +49,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
         win_probability: (fullMatchAnalysis || isPastOrCurrent) ? Math.round(probValue * 10) / 10 : null,
         actual_prob: Math.round(probValue * 10) / 10,
         isCurrent: idx === currentDeliveryIndex,
+        isPastOrCurrent,
       };
     });
   }, [deliveries, currentDeliveryIndex, fullMatchAnalysis]);
@@ -79,7 +80,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleFullMatchAnalysis}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium border transition-all cursor-pointer shadow-xs ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs min-h-[32px] ${
               fullMatchAnalysis
                 ? 'bg-[#FEF3F2] border-[#FECDCA] text-[#B42318]'
                 : 'bg-[#F9FAFB] border-[#EAECF0] text-[#475467] hover:text-[#17191F] hover:bg-[#F2F4F7]'
@@ -89,7 +90,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
             {fullMatchAnalysis ? (
               <>
                 <Eye className="w-3.5 h-3.5 text-[#E31E24]" />
-                <span className="font-semibold">Full Timeline Visible</span>
+                <span>Full Timeline Visible</span>
               </>
             ) : (
               <>
@@ -199,12 +200,18 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
                   const data = payload[0].payload;
                   const prob = data.win_probability;
                   const isChasingFavored = prob !== null && prob >= 50;
+                  const isFuture = !data.isPastOrCurrent;
 
                   return (
-                    <div className="bg-white/95 border border-[#EAECF0] p-3 rounded-xl shadow-xl backdrop-blur-md text-xs min-w-[210px] text-[#17191F]">
-                      <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[#EAECF0]">
-                        <span className="font-bold text-[#17191F] font-mono-numbers">
+                    <div className="bg-white/95 border border-[#EAECF0] p-3 rounded-xl shadow-xl backdrop-blur-md text-xs min-w-[220px] max-w-[280px] text-[#17191F]">
+                      <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-[#EAECF0] gap-2">
+                        <span className="font-bold text-[#17191F] font-mono-numbers flex items-center gap-1.5">
                           Over {data.display_over}
+                          {isFuture && (
+                            <span className="text-[9px] font-semibold uppercase px-1.5 py-0.2 rounded bg-[#F2F4F7] text-[#667085]">
+                              Future
+                            </span>
+                          )}
                         </span>
                         <span
                           className={`font-black font-mono-numbers ${
@@ -227,7 +234,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
                             {data.runs_required} runs
                           </span>
                         </div>
-                        <div className="text-[11px] text-[#667085] italic pt-1 truncate max-w-[220px]">
+                        <div className="text-[11px] text-[#475467] italic pt-1.5 border-t border-[#EAECF0] mt-1 break-words leading-snug">
                           {data.bowler} → {data.batter}: {data.event}
                         </div>
                       </div>
@@ -253,7 +260,7 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
 
       {/* Mini Turning Point Jump Bar under the Chart */}
       <div className="mt-3.5 pt-3.5 border-t border-[#EAECF0] flex flex-wrap items-center gap-2">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-[#667085] flex items-center gap-1">
+        <span className="text-[11px] font-bold uppercase tracking-wider text-[#667085] flex items-center gap-1 shrink-0">
           <Flame className="w-3.5 h-3.5 text-[#E31E24]" />
           Turning Points:
         </span>
@@ -267,15 +274,17 @@ export const WinProbabilityChart: React.FC<WinProbabilityChartProps> = ({
                 onSeek(tp.end_delivery_idx);
                 onSelectTurningPoint(tp);
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono-numbers border transition-all cursor-pointer shadow-xs ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono-numbers border transition-all cursor-pointer shadow-xs min-h-[32px] whitespace-nowrap ${
                 isSelected
                   ? 'bg-[#FEF3F2] border-2 border-[#E31E24] text-[#B42318] font-bold ring-1 ring-[#E31E24]/20'
-                  : 'bg-[#F9FAFB] hover:bg-white border-[#EAECF0] text-[#344054]'
+                  : isPositive
+                  ? 'bg-[#ECFDF3]/80 hover:bg-[#ECFDF3] border-[#A6F4C5] text-[#027A48]'
+                  : 'bg-[#FEF3F2]/80 hover:bg-[#FEF3F2] border-[#FECDCA] text-[#D92D20]'
               }`}
               title={`Jump to ${tp.over_label}: ${tp.summary}`}
             >
-              <span className={`w-2 h-2 rounded-full ${isPositive ? 'bg-[#027A48]' : 'bg-[#D92D20]'}`} />
-              <span>TP#{idx + 1} ({tp.over_label})</span>
+              <span className={`w-2 h-2 rounded-full shrink-0 ${isPositive ? 'bg-[#027A48]' : 'bg-[#D92D20]'}`} />
+              <span className="font-medium text-[#17191F]">TP#{idx + 1} ({tp.over_label})</span>
               <span className={isPositive ? 'text-[#027A48] font-bold' : 'text-[#D92D20] font-bold'}>
                 {isPositive ? '+' : ''}{tp.shift_percentage}%
               </span>

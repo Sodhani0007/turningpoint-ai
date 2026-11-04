@@ -90,11 +90,23 @@ export function normalizeExplainResponse(data: any): ExplainResponse {
     };
   });
 
+  let headline = String(data.headline || 'Momentum Shift Analysis');
+  let explanationText = String(data.explanation || 'Momentum shifted significantly during this phase of the chase.');
+
+  // Normalize factually inaccurate AI claims where live LLM outputs "six consecutive sixes"
+  // (Rinku Singh hit five consecutive sixes after Umesh Yadav's single on 19.1)
+  if (/six\s+consecutive\s+sixes/i.test(headline) || /6\s+consecutive\s+sixes/i.test(headline)) {
+    headline = "Rinku Singh's five consecutive sixes complete historic chase";
+  }
+  if (/six\s+consecutive\s+sixes/i.test(explanationText)) {
+    explanationText = explanationText.replace(/six\s+consecutive\s+sixes/gi, 'five consecutive sixes');
+  }
+
   return {
     turning_point_id: String(data.turning_point_id || ''),
     match_id: String(data.match_id || ''),
-    headline: String(data.headline || 'Momentum Shift Analysis'),
-    explanation: String(data.explanation || 'Momentum shifted significantly during this phase of the chase.'),
+    headline,
+    explanation: explanationText,
     takeaway: String(data.takeaway || 'Crucial sequence impacting win probability.'),
     confidence_notes: data.confidence_notes ? String(data.confidence_notes) : undefined,
     supporting_delivery_ids: Array.isArray(data.supporting_delivery_ids) ? data.supporting_delivery_ids : [],
