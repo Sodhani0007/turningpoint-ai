@@ -213,7 +213,7 @@ export const App: React.FC = () => {
     : [];
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#17191F] flex flex-col selection:bg-[#E31E24] selection:text-white">
       {/* Top Header */}
       <Header
         backendStatus={backendStatus}
@@ -232,8 +232,8 @@ export const App: React.FC = () => {
 
         {/* Error Notification */}
         {errorMessage && (
-          <div className="p-4 rounded-xl bg-rose-950/40 border border-rose-500/50 text-rose-200 text-sm flex items-center gap-3">
-            <AlertTriangle className="w-5 h-5 text-rose-400 shrink-0" />
+          <div className="p-4 rounded-xl bg-[#FEF3F2] border border-[#FECDCA] text-[#B42318] text-sm flex items-center gap-3 shadow-xs">
+            <AlertTriangle className="w-5 h-5 text-[#D92D20] shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
@@ -241,8 +241,8 @@ export const App: React.FC = () => {
         {/* Loading Spinner */}
         {isLoadingMatch ? (
           <div className="py-24 flex flex-col items-center justify-center gap-3 text-center">
-            <div className="w-10 h-10 border-3 border-emerald-500/20 border-t-emerald-400 rounded-full animate-spin" />
-            <p className="text-sm font-semibold text-slate-300 font-display">
+            <div className="w-10 h-10 border-3 border-[#E31E24]/20 border-t-[#E31E24] rounded-full animate-spin" />
+            <p className="text-sm font-semibold text-[#344054] font-display">
               Loading second-innings delivery data & ML win probabilities...
             </p>
           </div>
@@ -291,16 +291,16 @@ export const App: React.FC = () => {
             />
 
             {/* Educational Cricket Context Card */}
-            <div className="p-4 rounded-2xl bg-[#0e1422] border border-slate-800 text-xs text-slate-400 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-slate-300">
-                <HelpCircle className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="p-4 rounded-2xl bg-white border border-[#E5E7EB] text-xs text-[#667085] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+              <div className="flex items-center gap-2.5 text-[#344054]">
+                <HelpCircle className="w-4 h-4 text-[#E31E24] shrink-0" />
                 <span>
-                  <strong>What does win probability represent?</strong> It is the estimated likelihood of the chasing team winning the match from the exact current game state (runs required, wickets in hand, balls left, and recent scoring rate), calibrated across 137,500 historical IPL deliveries.
+                  <strong className="text-[#17191F]">What does win probability represent?</strong> It is the estimated likelihood of the chasing team winning the match from the exact current game state (runs required, wickets in hand, balls left, and recent scoring rate), calibrated across 137,500 historical IPL deliveries.
                 </span>
               </div>
               <button
                 onClick={() => setIsMetricsOpen(true)}
-                className="text-emerald-400 hover:text-emerald-300 underline shrink-0 font-medium cursor-pointer"
+                className="text-[#E31E24] hover:text-[#C9161B] underline shrink-0 font-bold cursor-pointer"
               >
                 Inspect ML Diagnostics →
               </button>
@@ -310,13 +310,13 @@ export const App: React.FC = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#090d16] py-5 mt-12 text-xs text-slate-500">
+      <footer className="border-t border-[#EAECF0] bg-white py-5 mt-12 text-xs text-[#667085]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
           <div>
-            <span className="font-semibold text-slate-400">TurningPoint AI</span> — Dream11 FDE Internship Assignment. Built with React 19, FastAPI, scikit-learn & Cricsheet data.
+            <span className="font-bold text-[#17191F]">TurningPoint AI</span> — Dream11 FDE Internship Assignment. Built with React 19, FastAPI, scikit-learn & Cricsheet data.
           </div>
           <div>
-            Data provided by <a href="https://cricsheet.org" target="_blank" rel="noreferrer" className="text-emerald-400/80 hover:underline">Cricsheet</a> under CC BY-SA 4.0.
+            Data provided by <a href="https://cricsheet.org" target="_blank" rel="noreferrer" className="text-[#E31E24] hover:underline font-medium">Cricsheet</a> under CC BY-SA 4.0.
           </div>
         </div>
       </footer>

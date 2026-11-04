@@ -56,11 +56,11 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
   const speeds = [1, 2, 4];
 
   return (
-    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-4 shadow-xl" data-testid="replay-controls-card">
-      <div className="flex flex-col gap-3">
+    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-4 sm:p-5 shadow-sm" data-testid="replay-controls-card">
+      <div className="flex flex-col gap-3.5">
         {/* Seek Slider with Delivery Details */}
         <div className="flex items-center gap-4">
-          <span className="text-xs font-mono-numbers text-slate-400 min-w-[70px]" data-testid="delivery-counter">
+          <span className="text-xs font-mono-numbers font-medium text-[#667085] min-w-[70px]" data-testid="delivery-counter">
             Ball {currentDeliveryIndex + 1}/{totalDeliveries}
           </span>
 
@@ -71,10 +71,10 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             value={currentDeliveryIndex}
             onChange={(e) => onSeek(Number(e.target.value))}
             data-testid="replay-seek-slider"
-            className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-400 hover:accent-emerald-300 transition-all"
+            className="w-full h-2 bg-[#EAECF0] rounded-lg appearance-none cursor-pointer accent-[#E31E24] hover:accent-[#C9161B] transition-all"
           />
 
-          <span className="text-xs font-bold font-mono-numbers text-emerald-400 min-w-[65px] text-right" data-testid="current-over-label">
+          <span className="text-xs font-bold font-mono-numbers text-[#E31E24] min-w-[65px] text-right" data-testid="current-over-label">
             Over {currentDelivery?.display_over}
           </span>
         </div>
@@ -87,7 +87,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             <button
               onClick={onRestart}
               data-testid="restart-btn"
-              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-[#F9FAFB] hover:bg-[#F2F4F7] border border-[#EAECF0] hover:border-[#D0D5DD] text-[#344054] transition-colors cursor-pointer shadow-xs"
               title="Restart from ball 0 (R)"
             >
               <RotateCcw className="w-4 h-4" />
@@ -98,7 +98,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
               onClick={onStepBack}
               disabled={currentDeliveryIndex === 0}
               data-testid="step-back-btn"
-              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-[#F9FAFB] hover:bg-[#F2F4F7] border border-[#EAECF0] hover:border-[#D0D5DD] text-[#344054] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
               title="Step Backward (Left Arrow)"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -108,10 +108,10 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
             <button
               onClick={onTogglePlay}
               data-testid="play-pause-btn"
-              className={`flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-xs tracking-wide uppercase transition-all duration-200 cursor-pointer shadow-lg ${
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs tracking-wider uppercase transition-all duration-200 cursor-pointer shadow-sm ${
                 isPlaying
-                  ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
-                  : 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-emerald-500/25 ring-2 ring-emerald-400/20'
+                  ? 'bg-[#17191F] hover:bg-[#252830] text-white shadow-md'
+                  : 'bg-[#E31E24] hover:bg-[#C9161B] text-white shadow-md shadow-[#E31E24]/20'
               }`}
               title="Play/Pause (Spacebar)"
             >
@@ -133,7 +133,7 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
               onClick={onStepForward}
               disabled={currentDeliveryIndex >= totalDeliveries - 1}
               data-testid="step-forward-btn"
-              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-[#F9FAFB] hover:bg-[#F2F4F7] border border-[#EAECF0] hover:border-[#D0D5DD] text-[#344054] disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-xs"
               title="Step Forward (Right Arrow)"
             >
               <ChevronRight className="w-4 h-4" />
@@ -141,8 +141,8 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
           </div>
 
           {/* Speed Selector */}
-          <div className="flex items-center gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-800">
-            <Gauge className="w-3.5 h-3.5 text-slate-400 ml-1.5 mr-0.5" />
+          <div className="flex items-center gap-1.5 bg-[#F9FAFB] p-1 rounded-xl border border-[#EAECF0]">
+            <Gauge className="w-3.5 h-3.5 text-[#667085] ml-1.5 mr-0.5" />
             {speeds.map((s) => (
               <button
                 key={s}
@@ -150,8 +150,8 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
                 data-testid={`speed-btn-${s}x`}
                 className={`px-2.5 py-1 rounded-lg text-xs font-mono-numbers font-semibold transition-all cursor-pointer ${
                   playbackSpeed === s
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-white text-[#027A48] border border-emerald-500 shadow-xs'
+                    : 'text-[#667085] hover:text-[#17191F]'
                 }`}
               >
                 {s}x
@@ -160,17 +160,17 @@ export const ReplayControls: React.FC<ReplayControlsProps> = ({
           </div>
 
           {/* Quick Shortcuts hint */}
-          <div className="hidden lg:flex items-center gap-2 text-[10px] text-slate-400">
-            <span>Shortcuts:</span>
-            <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700 font-mono">
+          <div className="hidden lg:flex items-center gap-2 text-[10px] text-[#667085]">
+            <span className="font-medium">Shortcuts:</span>
+            <kbd className="px-1.5 py-0.5 bg-[#F2F4F7] rounded text-[#344054] border border-[#D0D5DD] font-mono">
               Space
             </kbd>
             <span>Play/Pause</span>
-            <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700 font-mono">
+            <kbd className="px-1.5 py-0.5 bg-[#F2F4F7] rounded text-[#344054] border border-[#D0D5DD] font-mono">
               ← / →
             </kbd>
             <span>Step</span>
-            <kbd className="px-1.5 py-0.5 bg-slate-800 rounded text-slate-300 border border-slate-700 font-mono">
+            <kbd className="px-1.5 py-0.5 bg-[#F2F4F7] rounded text-[#344054] border border-[#D0D5DD] font-mono">
               R
             </kbd>
             <span>Restart</span>

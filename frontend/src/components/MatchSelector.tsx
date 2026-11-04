@@ -1,6 +1,6 @@
 import React from 'react';
 import { MatchSummary } from '../types/cricket';
-import { Trophy, Calendar, MapPin, Sparkles } from 'lucide-react';
+import { Trophy, Calendar, Sparkles } from 'lucide-react';
 
 interface MatchSelectorProps {
   matches: MatchSummary[];
@@ -16,21 +16,21 @@ export const MatchSelector: React.FC<MatchSelectorProps> = ({
   isLoading,
 }) => {
   return (
-    <div className="bg-[#0e1422] border border-slate-800/90 rounded-2xl p-4 shadow-xl">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 shadow-sm">
+      <div className="flex items-center justify-between mb-3.5">
         <div className="flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-amber-400" />
-          <h2 className="text-sm font-semibold tracking-wide uppercase text-slate-300 font-display">
+          <Trophy className="w-4 h-4 text-amber-500" />
+          <h2 className="text-xs sm:text-sm font-bold tracking-wide uppercase text-[#17191F] font-display">
             Select IPL Classic Match
           </h2>
         </div>
-        <span className="text-xs text-slate-400 flex items-center gap-1">
-          <Sparkles className="w-3 h-3 text-emerald-400" />
+        <span className="text-xs text-[#667085] flex items-center gap-1 font-medium">
+          <Sparkles className="w-3.5 h-3.5 text-[#E31E24]" />
           {matches.length} Verified Thrillers
         </span>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         {matches.map((m) => {
           const isSelected = m.match_id === selectedMatchId;
           return (
@@ -39,39 +39,47 @@ export const MatchSelector: React.FC<MatchSelectorProps> = ({
               onClick={() => onSelectMatch(m.match_id)}
               disabled={isLoading}
               data-testid={`match-card-${m.match_id}`}
-              className={`text-left p-3 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden ${
+              className={`text-left p-3.5 rounded-xl border transition-all duration-200 cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                 isSelected
-                  ? 'bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.15)] ring-1 ring-emerald-500/30'
-                  : 'bg-slate-900/60 hover:bg-slate-900 border-slate-800 hover:border-slate-700'
+                  ? 'bg-white border-2 border-[#E31E24] shadow-md ring-2 ring-[#E31E24]/10'
+                  : 'bg-[#F9FAFB] hover:bg-white border-[#EAECF0] hover:border-[#D0D5DD] shadow-xs hover:shadow-sm'
               }`}
             >
               {isSelected && (
-                <div className="absolute top-0 right-0 w-12 h-12 bg-gradient-to-bl from-emerald-500/20 to-transparent pointer-events-none" />
+                <div className="absolute top-0 right-0 w-2 h-full bg-[#E31E24] pointer-events-none" />
               )}
               
-              <div className="flex items-center justify-between text-[11px] text-slate-400 mb-1.5">
-                <span className="flex items-center gap-1 font-mono-numbers">
-                  <Calendar className="w-3 h-3 text-slate-500" />
-                  {m.date}
-                </span>
-                <span className="px-1.5 py-0.5 rounded bg-slate-800 text-[10px] text-slate-300 font-medium">
-                  {m.turning_points_count} Pivotal Shifts
-                </span>
+              <div>
+                <div className="flex items-center justify-between text-[11px] text-[#667085] mb-2">
+                  <span className="flex items-center gap-1 font-mono-numbers">
+                    <Calendar className="w-3 h-3 text-[#98A2B3]" />
+                    {m.date}
+                  </span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${
+                      isSelected
+                        ? 'bg-[#FEF3F2] text-[#B42318] border border-[#FECDCA]'
+                        : 'bg-[#F2F4F7] text-[#344054]'
+                    }`}
+                  >
+                    {m.turning_points_count} Pivotal Shifts
+                  </span>
+                </div>
+
+                <div className="font-bold text-sm text-[#17191F] line-clamp-1 mb-0.5">
+                  {m.title}
+                </div>
+
+                <div className="text-xs text-[#667085] line-clamp-1 mb-3">
+                  {m.subtitle}
+                </div>
               </div>
 
-              <div className="font-semibold text-sm text-slate-100 line-clamp-1 mb-0.5">
-                {m.title}
-              </div>
-
-              <div className="text-xs text-slate-400 line-clamp-1 mb-2">
-                {m.subtitle}
-              </div>
-
-              <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px]">
-                <span className="text-emerald-400 font-medium font-mono-numbers">
+              <div className="pt-2.5 border-t border-[#EAECF0] flex items-center justify-between text-[11px]">
+                <span className="text-[#027A48] font-bold font-mono-numbers bg-[#ECFDF3] px-2 py-0.5 rounded">
                   Target: {m.target}
                 </span>
-                <span className="text-slate-400 text-[10px] truncate max-w-[130px]" title={m.venue}>
+                <span className="text-[#667085] text-[11px] truncate max-w-[130px]" title={m.venue}>
                   {m.venue ? m.venue.split(',')[0] : 'IPL Venue'}
                 </span>
               </div>

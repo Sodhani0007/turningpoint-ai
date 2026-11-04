@@ -30,53 +30,48 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const isBallsExhausted = ballsRemaining === 0;
 
   return (
-    <div className="bg-[#0e1422] border border-slate-800 rounded-2xl p-5 shadow-2xl relative overflow-hidden" data-testid="scoreboard-card">
-      {/* Background glow accent based on probability */}
-      <div
-        className={`absolute -top-24 -right-24 w-80 h-80 rounded-full blur-3xl pointer-events-none transition-all duration-700 opacity-20 ${
-          isChasingTeamAhead ? 'bg-emerald-500' : 'bg-cyan-600'
-        }`}
-      />
-
+    <div className="bg-white border border-[#E5E7EB] rounded-2xl p-5 sm:p-6 shadow-sm relative overflow-hidden" data-testid="scoreboard-card">
       {/* Match Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 mb-4 border-b border-slate-800/80">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-[#EAECF0]">
         <div>
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#667085]">
             {metadata.venue} • {metadata.date}
           </span>
-          <h2 className="text-base font-bold text-slate-100 flex items-center gap-2">
-            <span>{metadata.second_innings_team}</span>
-            <span className="text-xs font-normal text-slate-400">chasing</span>
-            <span className="text-emerald-400 font-mono-numbers">{metadata.target_runs}</span>
-            <span className="text-xs font-normal text-slate-400">
+          <h2 className="text-base sm:text-lg font-bold text-[#17191F] flex items-center gap-2 flex-wrap mt-0.5">
+            <span className="text-[#17191F]">{metadata.second_innings_team}</span>
+            <span className="text-xs font-medium text-[#667085]">chasing</span>
+            <span className="text-[#027A48] font-mono-numbers font-black bg-[#ECFDF3] px-2 py-0.5 rounded">
+              {metadata.target_runs}
+            </span>
+            <span className="text-xs font-normal text-[#667085]">
               set by {metadata.first_innings_team} ({metadata.first_innings_total}/{metadata.first_innings_wickets})
             </span>
           </h2>
         </div>
 
         {/* Win Probability Broadcast Gauge */}
-        <div className="flex items-center gap-3 bg-slate-900/90 border border-slate-700/80 rounded-xl px-4 py-2 shadow-inner">
+        <div className="flex items-center gap-3 bg-[#F9FAFB] border border-[#EAECF0] rounded-xl px-4 py-2.5 shadow-xs">
           <div className="text-right">
-            <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+            <div className="text-[10px] uppercase font-bold tracking-wider text-[#667085]">
               Model Win Probability
             </div>
-            <div className="text-xs text-slate-400 truncate max-w-[140px]">
+            <div className="text-xs text-[#344054] font-semibold truncate max-w-[140px]">
               {metadata.second_innings_team}
             </div>
           </div>
-          <div className="flex items-baseline gap-1">
+          <div className="flex items-baseline gap-1 pl-2 border-l border-[#EAECF0]">
             <span
-              className={`text-2xl font-black font-mono-numbers tracking-tight ${
-                isChasingTeamAhead ? 'text-emerald-400' : 'text-cyan-400'
+              className={`text-2xl sm:text-3xl font-black font-mono-numbers tracking-tight ${
+                isChasingTeamAhead ? 'text-[#027A48]' : 'text-[#D92D20]'
               }`}
               data-testid="win-probability-value"
             >
               {winProbPct}%
             </span>
             {isChasingTeamAhead ? (
-              <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+              <ArrowUpRight className="w-5 h-5 text-[#027A48]" />
             ) : (
-              <ArrowDownRight className="w-4 h-4 text-cyan-400" />
+              <ArrowDownRight className="w-5 h-5 text-[#D92D20]" />
             )}
           </div>
         </div>
@@ -85,27 +80,29 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
       {/* Main Score & Equation Metrics */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 mb-5">
         {/* Score & Wickets */}
-        <div className="col-span-2 bg-gradient-to-br from-slate-900 to-slate-900/70 border border-slate-800 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+        <div className="col-span-2 bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-3.5 flex flex-col justify-between shadow-xs">
+          <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider flex items-center justify-between">
             <span>Score & Overs</span>
-            <span className="text-emerald-400 font-mono-numbers">Target {metadata.target_runs}</span>
+            <span className="text-[#027A48] font-bold font-mono-numbers bg-[#ECFDF3] px-1.5 py-0.5 rounded">
+              Target {metadata.target_runs}
+            </span>
           </div>
           <div className="flex items-baseline gap-3 my-1">
-            <div className="text-4xl font-black text-white font-mono-numbers tracking-tight" data-testid="scoreboard-runs">
+            <div className="text-4xl font-black text-[#17191F] font-mono-numbers tracking-tight" data-testid="scoreboard-runs">
               {currentDelivery.score}
-              <span className="text-2xl font-bold text-slate-400">/{currentDelivery.wickets_lost}</span>
+              <span className="text-2xl font-bold text-[#667085]">/{currentDelivery.wickets_lost}</span>
             </div>
-            <div className="text-sm font-semibold text-slate-400 font-mono-numbers" data-testid="scoreboard-overs">
+            <div className="text-sm font-semibold text-[#667085] font-mono-numbers" data-testid="scoreboard-overs">
               {currentDelivery.display_over} / {metadata.scheduled_overs} ov
             </div>
           </div>
-          <div className="text-xs text-slate-400 flex items-center gap-2">
+          <div className="text-xs text-[#667085] flex items-center gap-2">
             <span>
-              CRR: <strong className="text-slate-200 font-mono-numbers">{currentDelivery.current_run_rate}</strong>
+              CRR: <strong className="text-[#17191F] font-mono-numbers">{currentDelivery.current_run_rate}</strong>
             </span>
             <span>•</span>
             <span>
-              RRR: <strong className={`font-mono-numbers ${currentDelivery.required_run_rate > 15 ? 'text-rose-400' : 'text-amber-400'}`}>
+              RRR: <strong className={`font-mono-numbers font-bold ${currentDelivery.required_run_rate > 12 ? 'text-[#D92D20]' : 'text-[#B54708]'}`}>
                 {currentDelivery.required_run_rate > 100 ? '---' : currentDelivery.required_run_rate}
               </strong>
             </span>
@@ -113,61 +110,61 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
         </div>
 
         {/* Runs Needed */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Target className="w-3.5 h-3.5 text-cyan-400" />
+        <div className="bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-3.5 flex flex-col justify-between shadow-xs">
+          <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider flex items-center gap-1.5">
+            <Target className="w-3.5 h-3.5 text-[#175CD3]" />
             <span>Need</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono-numbers my-0.5" data-testid="runs-needed-value">
-            {runsNeeded} <span className="text-xs font-normal text-slate-400">runs</span>
+          <div className="text-2xl font-black text-[#17191F] font-mono-numbers my-0.5" data-testid="runs-needed-value">
+            {runsNeeded} <span className="text-xs font-normal text-[#667085]">runs</span>
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[#667085] font-medium">
             {isChaseComplete ? 'Target Reached!' : `${runsNeeded} to win`}
           </div>
         </div>
 
         {/* Balls Remaining */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Timer className="w-3.5 h-3.5 text-amber-400" />
+        <div className="bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-3.5 flex flex-col justify-between shadow-xs">
+          <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider flex items-center gap-1.5">
+            <Timer className="w-3.5 h-3.5 text-[#B54708]" />
             <span>Balls Left</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono-numbers my-0.5" data-testid="balls-remaining-value">
-            {ballsRemaining} <span className="text-xs font-normal text-slate-400">balls</span>
+          <div className="text-2xl font-black text-[#17191F] font-mono-numbers my-0.5" data-testid="balls-remaining-value">
+            {ballsRemaining} <span className="text-xs font-normal text-[#667085]">balls</span>
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[#667085] font-medium font-mono-numbers">
             {Math.floor(ballsRemaining / 6)}.{ballsRemaining % 6} overs
           </div>
         </div>
 
         {/* Wickets in Hand */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Shield className="w-3.5 h-3.5 text-emerald-400" />
+        <div className="bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-3.5 flex flex-col justify-between shadow-xs">
+          <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider flex items-center gap-1.5">
+            <Shield className="w-3.5 h-3.5 text-[#027A48]" />
             <span>In Hand</span>
           </div>
-          <div className="text-2xl font-black text-white font-mono-numbers my-0.5">
-            {currentDelivery.wickets_remaining} <span className="text-xs font-normal text-slate-400">wkts</span>
+          <div className="text-2xl font-black text-[#17191F] font-mono-numbers my-0.5">
+            {currentDelivery.wickets_remaining} <span className="text-xs font-normal text-[#667085]">wkts</span>
           </div>
-          <div className="text-[11px] text-slate-400">
+          <div className="text-[11px] text-[#667085] font-medium">
             {currentDelivery.wickets_lost} down
           </div>
         </div>
 
         {/* Current Match Status */}
-        <div className="bg-slate-900/80 border border-slate-800 rounded-xl p-3 flex flex-col justify-between">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5 text-rose-400" />
+        <div className="bg-[#F9FAFB] border border-[#EAECF0] rounded-xl p-3.5 flex flex-col justify-between shadow-xs">
+          <div className="text-[11px] font-bold text-[#667085] uppercase tracking-wider flex items-center gap-1.5">
+            <Flame className="w-3.5 h-3.5 text-[#E31E24]" />
             <span>Phase</span>
           </div>
-          <div className="text-sm font-bold text-slate-200 mt-1">
+          <div className="text-xs sm:text-sm font-bold text-[#17191F] mt-1">
             {currentDelivery.legal_balls_bowled <= 36
               ? 'Powerplay (0-6)'
               : currentDelivery.legal_balls_bowled <= 90
               ? 'Middle Overs (7-15)'
               : 'Death Overs (16-20)'}
           </div>
-          <div className="text-[10px] text-slate-400 truncate">
+          <div className="text-[11px] text-[#667085] truncate font-medium">
             {isChaseComplete
               ? 'Chase Complete'
               : isAllOut
@@ -180,49 +177,49 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
       </div>
 
       {/* Current Delivery Highlight & Recent Ball Ticker */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800/80">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 p-3.5 rounded-xl bg-[#F9FAFB] border border-[#EAECF0]">
         {/* On Strike & Bowling */}
         <div className="flex items-center gap-3 text-xs flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-slate-400">Striker:</span>
-            <strong className="text-slate-100 font-semibold">{currentDelivery.batter}</strong>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-[#027A48] animate-pulse" />
+            <span className="text-[#667085]">Striker:</span>
+            <strong className="text-[#17191F] font-bold">{currentDelivery.batter}</strong>
           </div>
-          <span className="text-slate-700">|</span>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400">Bowler:</span>
-            <strong className="text-slate-100 font-semibold">{currentDelivery.bowler}</strong>
+          <span className="text-[#D0D5DD]">|</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-[#667085]">Bowler:</span>
+            <strong className="text-[#17191F] font-bold">{currentDelivery.bowler}</strong>
           </div>
-          <span className="text-slate-700">|</span>
-          <div className="text-slate-300 font-medium italic">
+          <span className="text-[#D0D5DD]">|</span>
+          <div className="text-[#344054] font-medium italic">
             "{currentDelivery.event_description}"
           </div>
         </div>
 
         {/* Recent Deliveries Ticker */}
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] uppercase font-bold text-slate-400 mr-1">Recent:</span>
+          <span className="text-[10px] uppercase font-bold text-[#667085] mr-1">Recent:</span>
           {recentDeliveries.map((d) => {
-            let badgeColor = 'bg-slate-800 text-slate-300 border-slate-700 hover:border-slate-500';
+            let badgeStyle = 'bg-white text-[#344054] border-[#D0D5DD] hover:border-[#98A2B3]';
             let label = d.total_runs.toString();
 
             if (d.wicket_count_delivery > 0) {
-              badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/40 font-bold hover:bg-rose-500/30';
+              badgeStyle = 'bg-[#FEF3F2] text-[#B42318] border-[#FECDCA] font-bold hover:bg-[#FEE4E2]';
               label = 'W';
             } else if (d.batter_runs === 6) {
-              badgeColor = 'bg-purple-500/20 text-purple-300 border-purple-500/40 font-bold hover:bg-purple-500/30';
+              badgeStyle = 'bg-[#F9F5FF] text-[#6941C6] border-[#E9D7FE] font-bold hover:bg-[#F4EBFF]';
               label = '6';
             } else if (d.batter_runs === 4) {
-              badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 font-bold hover:bg-emerald-500/30';
+              badgeStyle = 'bg-[#ECFDF3] text-[#027A48] border-[#A6F4C5] font-bold hover:bg-[#D1FADF]';
               label = '4';
             } else if (d.is_wide) {
-              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30';
+              badgeStyle = 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89] hover:bg-[#FEF0C7]';
               label = `${d.total_runs}wd`;
             } else if (d.is_noball) {
-              badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30';
+              badgeStyle = 'bg-[#FFFAEB] text-[#B54708] border-[#FEDF89] hover:bg-[#FEF0C7]';
               label = `${d.total_runs}nb`;
             } else if (d.total_runs === 0) {
-              badgeColor = 'bg-slate-900 text-slate-500 border-slate-800 hover:border-slate-600';
+              badgeStyle = 'bg-white text-[#98A2B3] border-[#EAECF0] hover:border-[#D0D5DD]';
               label = '•';
             }
 
@@ -233,8 +230,8 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
                 key={d.delivery_idx}
                 type="button"
                 onClick={() => onSeek?.(d.delivery_idx)}
-                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono-numbers border transition-all cursor-pointer ${badgeColor} ${
-                  isCurrent ? 'ring-2 ring-emerald-400 shadow-sm' : ''
+                className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-mono-numbers border transition-all cursor-pointer shadow-2xs ${badgeStyle} ${
+                  isCurrent ? 'ring-2 ring-[#E31E24] shadow-xs scale-105' : ''
                 }`}
                 title={`Click to jump to Over ${d.display_over}: ${d.event_description}`}
               >
