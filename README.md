@@ -15,9 +15,14 @@
 ## 1. Live Demo and Repository Links
 
 - **Production Frontend:** [https://frontend-mauve-omega-75.vercel.app](https://frontend-mauve-omega-75.vercel.app)
+- **Redesigned UI — Live Preview:** [Open Dream11-Inspired Dashboard](https://frontend-g89la99cu-sodhani0007.vercel.app)
+- **Redesigned UI Source Code:** [feature/dream11-inspired-ui](https://github.com/Sodhani0007/turningpoint-ai/tree/feature/dream11-inspired-ui)
+
 - **Production Backend:** [https://turningpoint-ai-backend.onrender.com](https://turningpoint-ai-backend.onrender.com)
 - **Interactive API Documentation:** [https://turningpoint-ai-backend.onrender.com/docs](https://turningpoint-ai-backend.onrender.com/docs)
 - **GitHub Repository:** [https://github.com/Sodhani0007/turningpoint-ai](https://github.com/Sodhani0007/turningpoint-ai)
+
+*The redesigned interface is a post-submission visual refinement. The original submitted application remains available separately.*
 
 ---
 
@@ -49,8 +54,8 @@ In high-stakes Twenty20 (T20) cricket, match momentum is exceptionally volatile.
 - **Model Diagnostics Dashboard:** Dedicated modal inspecting out-of-sample ROC-AUC, Brier score, log loss, calibration curves, and feature definitions.
 - **Dual-Mode Architectural Resilience:** Operates with full live API integration when the backend is connected, while seamlessly supporting complete offline replay and precomputed explanations if external services are unavailable.
 
-### Production Dashboard Overview
-![TurningPoint AI Production Dashboard](docs/screenshots/dashboard_overview.png)
+### Redesigned Dashboard Overview
+![Redesigned Desktop Dashboard](docs/screenshots/redesign/01-dashboard-desktop.png)
 
 ---
 
@@ -126,7 +131,7 @@ turningpoint-ai/
 
 | Layer | Technologies | Purpose |
 | :--- | :--- | :--- |
-| **Frontend** | React 19, TypeScript, Tailwind CSS v4, Vite 6 | High-performance SPA with broadcast-style dark theme |
+| **Frontend** | React 19, TypeScript, Tailwind CSS v4, Vite 6 | Responsive sports-analytics SPA with Dream11-inspired crimson, charcoal, and light dashboard styling |
 | **Data Visualization** | Recharts | Responsive win-probability curves and momentum charts |
 | **Frontend Testing** | Playwright | End-to-end browser and mobile test automation |
 | **Backend Framework** | FastAPI, Uvicorn, Pydantic v2 | High-throughput asynchronous REST API |
@@ -199,8 +204,7 @@ Every explanation payload contains a `source` tag:
 2. `precomputed_llm`: Pre-generated explanation derived from the verified model pipeline for instant offline replay.
 3. `deterministic_fallback`: Factual explanation generated algorithmically from match events if the external provider times out or errors.
 
-![Explain Shift Modal with Evidence Grounding](docs/screenshots/explain_shift_modal.png)
-
+![Explain Shift Modal](docs/screenshots/redesign/02-explain-modal-desktop.png)
 ### Ask AI Custom Question Answering
 The Ask AI interface allows users to submit targeted analytical questions about any selected turning point:
 - **Focused Prompting:** When a custom question is entered, the engine switches to a specialized Q&A prompt instructing the model to answer the specific query directly (e.g., identifying bowler names, boundary sequences, or strategic shifts) using the verified delivery records.
@@ -210,7 +214,7 @@ The Ask AI interface allows users to submit targeted analytical questions about 
 - **Graceful Error Handling:** If an external inference error occurs during a custom question, the UI displays a clear alert (`data-testid="qa-error-alert"`) rather than silently substituting the generic turning-point explanation.
 - **Independent Explain Shift:** The default "Explain Shift" button remains completely independent and continues to provide the comprehensive phase overview.
 
-![Ask AI Dedicated Question and Grounded Answer Card](docs/screenshots/ask_ai_qa_modal.png)
+![Ask AI Interface](docs/screenshots/redesign/03-ask-ai-desktop.png)
 
 ---
 
@@ -319,14 +323,26 @@ The repository maintains automated test suites across both backend and frontend:
   - Deterministic fallback and factual disambiguation
 
 ### Frontend Automated Testing (`npx playwright test`)
-- **4 passed tests** across Chromium and Mobile viewports covering:
-  - Custom question handling for three distinct queries:
-    1. *"Why did KKR's win probability increase in the final over?"*
-    2. *"How many sixes did Rinku Singh hit in the final five balls?"*
-    3. *"Who was bowling the final over?"*
-  - Dedicated User Question & AI Grounded Answer card (`data-testid="user-qa-card"`) rendering
-  - Error banner display (`data-testid="qa-error-alert"`) on inference failure
-  - Independent default "Explain Shift" modal functionality
+
+**Latest verified result: 28 tests passed, 0 failures.**
+
+- **User Journey Tests:** 6 passed
+- **Ask AI Question Tests:** 4 passed
+- **Explanation Schema Resilience Tests:** 6 passed
+- **Live Backend Integration Tests:** 8 passed
+- **Factual Consistency Tests:** 4 passed
+
+#### Additional Ask AI Test Coverage
+
+- Custom question handling for three distinct queries:
+  1. *"Why did KKR's win probability increase in the final over?"*
+  2. *"How many sixes did Rinku Singh hit in the final five balls?"*
+  3. *"Who was bowling the final over?"*
+- Dedicated User Question & AI Grounded Answer card (`data-testid="user-qa-card"`) rendering.
+- Error banner display (`data-testid="qa-error-alert"`) on inference failure.
+- Independent default **Explain Shift** modal functionality.
+
+Testing covers match selection, replay, turning-point navigation, grounded AI explanations, custom questions, API integration, and factual consistency.
 
 ### Frontend Build Verification (`npm run build`)
 - Full TypeScript type-checking (`tsc -b`) and Vite production bundle generation with 0 errors.
@@ -351,7 +367,8 @@ Evaluation performed strictly on the out-of-sample test set (IPL Seasons $\ge$ 2
 
 Reviewers can follow this quick walkthrough to experience the key features:
 
-1. **Open the Application:** Navigate to [https://frontend-mauve-omega-75.vercel.app](https://frontend-mauve-omega-75.vercel.app).
+1. **Open the Redesigned Application:** Navigate to
+   [TurningPoint AI — Dream11-Inspired UI](https://frontend-g89la99cu-sodhani0007.vercel.app).
 2. **Select Match:** Choose **GT vs KKR (2023)** from the match selector.
 3. **Inspect Turning Points:** Click on the **Rank #1 Turning Point** card (`Over 19.1 - 19.6`). The replay scrubber jumps to the start of the 20th over (176/7, 29 runs needed from 6 balls, 0.1% win probability).
 4. **Replay the Over:** Click **Play** at **2x Speed** to watch the scrubber and ball ticker advance as Rinku Singh strikes 5 consecutive sixes off Yash Dayal, culminating in a 100.0% win probability on 19.6.
